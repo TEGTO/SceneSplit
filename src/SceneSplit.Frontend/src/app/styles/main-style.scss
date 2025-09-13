@@ -1,0 +1,45 @@
+@use '@angular/material' as mat;
+@import "./partials/global-styles.scss";
+@import "@angular/material/prebuilt-themes/azure-blue.css";
+@import url("https://fonts.googleapis.com/css?family=Nunito:400,700|Lato:400,800,900");
+
+$my-primary: mat.$azure-palette;
+$my-accent: mat.$blue-palette;
+
+$theme: mat.define-theme((color: (theme-type: light,
+                primary: $my-primary,
+                tertiary:$my-accent,
+            ),
+            typography: (brand-family: 'Lato',
+                bold-weight: 900),
+            density: (scale: 0)));
+
+$button-icon-light: mat.define-theme((color: (theme-type: dark,
+                primary: mat.$violet-palette,
+            ),
+        ));
+
+@include mat.core();
+@include mat.color-variants-backwards-compatibility($theme);
+
+@mixin toolbar-theme($theme) {
+    mat-toolbar {
+        background: mat.get-theme-color($theme, primary-container);
+    }
+}
+
+@mixin square-elements {
+
+    .mat-mdc-dialog-surface,
+    .mdc-button,
+    .mdc-raised-button,
+    .mdc-flat-button,
+    .mdc-stroked-button {
+        border-radius: 5px !important;
+    }
+}
+
+:root {
+    @include mat.all-component-themes($theme);
+    @include square-elements;
+}

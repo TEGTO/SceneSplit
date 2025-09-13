@@ -1,0 +1,16 @@
+**/node_modules
+**/.git
+**/.angular
+**/.gitignore
+**/README.md
+**/LICENSE
+**/.vscode
+**/npm-debug.log
+**/coverage
+**/.env
+**/.editorconfig
+**/.aws
+**/.dist
+**/Dockerfile*
+**/docker-compose*
+**/.dockerignore

@@ -1,0 +1,54 @@
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="Code Coverage">
+        <Configuration>
+          <CodeCoverage>
+            <ModulePaths>
+              <Include>
+                <ModulePath>.*\.dll$</ModulePath>
+              </Include>
+              <Exclude>
+		<ModulePath>.*Tests.dll</ModulePath>
+                <ModulePath>.*FluentValidation.*</ModulePath>
+		<ModulePath>.*Moq.*</ModulePath>
+		<ModulePath>.*NUnit3.*</ModulePath>
+		<ModulePath>.*NUnit3.TestAdapter.*</ModulePath>
+		<ModulePath>.*Testcontainers.*</ModulePath>
+		<ModulePath>.*Testcontainers.PostgreSql.*</ModulePath>
+		<ModulePath>.*Dapper.*</ModulePath>
+		<ModulePath>.*Hangfire.*</ModulePath>
+		<ModulePath>.*Pipelines.Sockets.Unofficial.*</ModulePath>
+		<ModulePath>.*RichardSzalay.*</ModulePath>
+		<ModulePath>.*Serilog.*</ModulePath>
+		<ModulePath>.*StackExchange.*</ModulePath>
+		<ModulePath>.*\\coverlet.collector.*</ModulePath>
+              </Exclude>
+            </ModulePaths>
+
+	    <!-- Exclude anything in the folders -->
+            <Functions>
+              <Exclude>
+                <Function>Domain</Function>
+		<Function>Models</Function>
+		<Function>.*Migrations.*</Function>
+		<Function>Configurations</Function>
+		<Function>Dtos</Function>
+		<Function>Entities</Function>
+              </Exclude>
+            </Functions>
+
+            <!-- Exclude file names -->
+            <Sources>
+              <Exclude>
+                 <Source>.*DbContext.cs</Source>
+		 <Source>.*Configuration.cs</Source>
+              </Exclude>
+            </Sources>
+          </CodeCoverage>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>
+

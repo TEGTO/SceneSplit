@@ -1,0 +1,9 @@
+@use 'utils' as utils;
+
+.wrapper {
+    width: utils.pxToRem(750);
+
+    .wrapper__form-container {
+        width: utils.pxToRem(350);
+    }
+}

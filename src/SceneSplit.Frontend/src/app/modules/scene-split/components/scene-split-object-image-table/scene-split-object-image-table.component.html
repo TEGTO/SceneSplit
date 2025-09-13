@@ -1,0 +1,36 @@
+<div class="flex justify-center">
+    <div class="flex justify-center p-10 rounded-2xl w-full">
+        <div class="bg-white p-6 rounded-lg shadow-md bg-box w-full">
+            <ng-container *ngIf="(images$ | async) as images">
+
+                <!-- If images exist -->
+                <div *ngIf="images.length > 0; else noImages" class="image-wrapper grid gap-6">
+
+                    <div *ngFor="let item of images" class="image-wrapper__row flex flex-col items-center gap-3">
+
+                        <!-- Image -->
+                        <div class="row__image shrink-0 flex items-center justify-center 
+                        bg-gray-50 rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                            <img [src]="item.url" alt="{{ item.description }}" class="w-full h-full object-cover" />
+                        </div>
+
+                        <!-- Description -->
+                        <p class="text-sm text-gray-600 text-center">
+                            {{ item.description }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Else block -->
+                <ng-template #noImages>
+                    <div class="flex items-center justify-center h-64">
+                        <p class="text-lg text-gray-500 text-center">
+                            Object images from the scene will appear here
+                        </p>
+                    </div>
+                </ng-template>
+
+            </ng-container>
+        </div>
+    </div>
+</div>

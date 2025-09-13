@@ -1,0 +1,7 @@
+@use '@angular/material' as mat;
+@use '../main-style.scss' as main;
+
+$task-box-shadow: rgba(0, 0, 0, 0.1);
+$global-green: #00a046;
+$link-light-blue: #001bb1;
+$primary: mat.get-theme-color(main.$theme, primary);

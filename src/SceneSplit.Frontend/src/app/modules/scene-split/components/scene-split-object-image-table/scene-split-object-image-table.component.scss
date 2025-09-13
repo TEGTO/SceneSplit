@@ -1,0 +1,19 @@
+@use 'utils' as utils;
+
+.bg-box {
+    min-width: utils.pxToRem(300);
+    min-height: utils.pxToRem(300);
+}
+
+.image-wrapper {
+    grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
+
+    .image-wrapper__row {
+        min-width: utils.pxToRem(256);
+
+        .row__image {
+            width: utils.pxToRem(256);
+            height: utils.pxToRem(256);
+        }
+    }
+}
