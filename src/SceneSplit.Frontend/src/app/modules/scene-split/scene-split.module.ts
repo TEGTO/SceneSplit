@@ -9,7 +9,7 @@ import { MatTableModule } from '@angular/material/table';
 import { RouterModule, Routes } from '@angular/router';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
-import { BookEffects, SceneSplitImageDropDownComponent, sceneSplitReducer } from '.';
+import { SceneSplitEffects, SceneSplitImageDropDownComponent, sceneSplitReducer } from '.';
 import { SceneSplitObjectImageTableComponent } from './components/scene-split-object-image-table/scene-split-object-image-table.component';
 import { SceneSplitViewComponent } from './components/scene-split-view/scene-split-view.component';
 
@@ -36,7 +36,7 @@ const routes: Routes = [
     MatButtonModule,
     MatTableModule,
     StoreModule.forFeature('scene-split', sceneSplitReducer),
-    EffectsModule.forFeature([BookEffects]),
+    EffectsModule.forFeature([SceneSplitEffects]),
   ]
 })
 export class SceneSplitModule { }

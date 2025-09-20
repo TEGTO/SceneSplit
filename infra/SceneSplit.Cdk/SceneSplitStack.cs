@@ -60,8 +60,11 @@ public class SceneSplitStack : Stack
                     File = props.FrontendDockerfileName,
                     BuildArgs = new Dictionary<string, string>
                     {
-                        { "ENV", "production" }
-                    }
+                        { "ENV", "production" },
+                        { "HUB_URL", "https://api.mycompany.com/hubs/scene-split" },
+                        { "MAX_FILE_SIZE", (10 * 1024 * 1024).ToString() },
+                        { "ALLOWED_IMAGE_TYPES", "image/png,image/jpeg" }
+                }
                 }),
                 ContainerPort = 80,
                 LogDriver = LogDriver.AwsLogs(new AwsLogDriverProps

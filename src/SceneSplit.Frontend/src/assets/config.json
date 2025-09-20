@@ -1,0 +1,5 @@
+{
+    "hubUrl": "http://localhost:5162/hubs/scene-split",
+    "maxFileSize": "10485760",
+    "allowedImageTypes": "image/png,image/jpeg"
+}

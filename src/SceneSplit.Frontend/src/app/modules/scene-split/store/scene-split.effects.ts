@@ -7,7 +7,7 @@ import { SnackbarManager } from "../../shared";
 @Injectable({
     providedIn: 'root'
 })
-export class BookEffects {
+export class SceneSplitEffects {
     private readonly userId: string;
 
     constructor(

@@ -3,16 +3,18 @@ import * as signalR from '@microsoft/signalr';
 import * as signalRMsgPack from '@microsoft/signalr-protocol-msgpack';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { mapObjectImageResponseToObjectImage, ObjectImage, ObjectImageResponse, SendSceneImageRequest } from '../..';
-import { environment } from '../../../../../environments/environment';
+import { ConfigService } from '../../../shared';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SceneSplitHubClientService implements OnDestroy {
-  private hubConnection!: signalR.HubConnection;
-
   private readonly imagesSubject = new BehaviorSubject<ObjectImage[]>([]);
   private readonly errorSubject = new Subject<Error>();
+
+  private hubConnection!: signalR.HubConnection;
+
+  constructor(private readonly configService: ConfigService) { }
 
   images$: Observable<ObjectImage[]> = this.imagesSubject.asObservable();
   errors$: Observable<Error> = this.errorSubject.asObservable();
@@ -24,7 +26,7 @@ export class SceneSplitHubClientService implements OnDestroy {
     }
 
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl(environment.hubUrl)
+      .withUrl(this.configService.hubUrl)
       .withHubProtocol(new signalRMsgPack.MessagePackHubProtocol())
       .withAutomaticReconnect()
       .build();
