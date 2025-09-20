@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { sendSceneImageFile, SendSceneImageRequest } from '../..';
+import { sendSceneImageFile } from '../..';
 import { environment } from '../../../../../environments/environment';
 
 @Component({
@@ -37,6 +37,14 @@ export class SceneSplitImageDropDownComponent implements OnInit {
         return;
       }
 
+      if (!environment.allowedImageTypes.includes(file.type)) {
+        this.fileError = 'Only PNG and JPG files are allowed.';
+        this.fileInput.setValue(null);
+        return;
+      }
+
+      this.fileError = null;
+
       this.fileInput.setValue(file);
       this.fileInput.markAsTouched();
     }
@@ -46,10 +54,7 @@ export class SceneSplitImageDropDownComponent implements OnInit {
 
   sendSceneImageFile() {
     if (this.formGroup.valid) {
-      const req: SendSceneImageRequest = {
-        file: this.fileInput.value,
-      };
-      this.store.dispatch(sendSceneImageFile({ req: req }));
+      this.store.dispatch(sendSceneImageFile({ file: this.fileInput.value }));
     }
   }
 }

@@ -1,5 +1,5 @@
 import { createReducer, on } from "@ngrx/store";
-import { getObjectImagesSuccess, ObjectImage, sendSceneImageFileSuccess } from "..";
+import { getObjectImagesSuccess, ObjectImage } from "..";
 
 export interface SceneSplitState {
     objectImages: ObjectImage[],
@@ -11,14 +11,8 @@ const initialSceneSplitState: SceneSplitState = {
 export const sceneSplitReducer = createReducer(
     initialSceneSplitState,
 
-    on(getObjectImagesSuccess, (state, { books }) => ({
+    on(getObjectImagesSuccess, (state, { images }) => ({
         ...state,
-        objectImages: books,
+        objectImages: images,
     })),
-
-    on(sendSceneImageFileSuccess, (state, { book }) => ({
-        ...state,
-        objectImages: [book, ...state.objectImages],
-    })),
-
 );

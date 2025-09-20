@@ -21,6 +21,8 @@
     "@angular/platform-browser": "^18.0.0",
     "@angular/platform-browser-dynamic": "^18.0.0",
     "@angular/router": "^18.0.0",
+    "@microsoft/signalr": "^9.0.6",
+    "@microsoft/signalr-protocol-msgpack": "^9.0.6",
     "@ngrx/effects": "^18.1.1",
     "@ngrx/store": "^18.1.1",
     "@tailwindcss/postcss": "^4.0.14",

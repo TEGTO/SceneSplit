@@ -1,31 +1,39 @@
 import { Injectable } from "@angular/core";
 import { Actions, createEffect, ofType } from "@ngrx/effects";
-import { catchError, map, mergeMap, of, switchMap } from "rxjs";
-import { BookTemplateApiService, getObjectImages, getObjectImagesFailure, getObjectImagesSuccess, sendSceneImageFile, sendSceneImageFileFailure, sendSceneImageFileSuccess } from "..";
-import { RedirectorService, SnackbarManager } from "../../shared";
+import { catchError, from, map, merge, mergeMap, of, switchMap } from "rxjs";
+import { getObjectImages, getObjectImagesFailure, getObjectImagesSuccess, SceneSplitHubClientService, sendSceneImageFile, sendSceneImageFileFailure, sendSceneImageFileSuccess, UserIdManagerService } from "..";
+import { SnackbarManager } from "../../shared";
 
 @Injectable({
     providedIn: 'root'
 })
 export class BookEffects {
+    private readonly userId: string;
+
     constructor(
         private readonly actions$: Actions,
-        private readonly apiService: BookTemplateApiService,
         private readonly snackbarManager: SnackbarManager,
-        private readonly redirector: RedirectorService,
-    ) { }
+        private readonly hubService: SceneSplitHubClientService,
+        private readonly userIdManager: UserIdManagerService,
+    ) {
+        this.userId = this.userIdManager.getUserId();
+    }
 
     getObjectImages$ = createEffect(() =>
         this.actions$.pipe(
             ofType(getObjectImages),
-            switchMap(() =>
-                this.apiService.getBooks().pipe(
-                    map((response) => {
-                        return getObjectImagesSuccess({ books: response });
-                    }),
-                    catchError(error => of(getObjectImagesFailure({ error: error.message })))
-                )
-            )
+            switchMap(() => {
+                this.hubService.startConnection(this.userId);
+
+                return merge(
+                    this.hubService.images$.pipe(
+                        map(images => getObjectImagesSuccess({ images }))
+                    ),
+                    this.hubService.errors$.pipe(
+                        map(error => getObjectImagesFailure({ error: error.message }))
+                    )
+                );
+            })
         )
     );
     getObjectImagesFailure$ = createEffect(() =>
@@ -43,13 +51,22 @@ export class BookEffects {
         this.actions$.pipe(
             ofType(sendSceneImageFile),
             mergeMap((action) =>
-                this.apiService.createBook(action.req).pipe(
-                    map((response) => {
-                        return sendSceneImageFileSuccess({ book: response });
-                    }),
+                from(this.hubService.uploadSceneImage(this.userId, action.file)).pipe(
+                    map(() => sendSceneImageFileSuccess()),
                     catchError(error => of(sendSceneImageFileFailure({ error: error.message })))
                 )
             )
         )
+    );
+
+    sendSceneImageFileFailure$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(sendSceneImageFileFailure),
+            switchMap((action) => {
+                this.snackbarManager.openErrorSnackbar(["Failed to send scene image: " + action.error]);
+                return of();
+            })
+        ),
+        { dispatch: false }
     );
 }

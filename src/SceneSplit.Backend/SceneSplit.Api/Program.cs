@@ -1,15 +1,30 @@
+using SceneSplit.Api.Extenstions;
+using SceneSplit.Api.Hubs;
+using SceneSplit.Api.Sevices.ImagePersistent;
+using SceneSplit.Api.Sevices.SceneImageProcessor;
+using SceneSplit.Configuration;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+var maxImageSize = int.Parse(builder.Configuration[ApiConfigurationKeys.MAX_IMAGE_SIZE] ?? (10 * 1024 * 1024).ToString());
+builder.Services.AddSignalR(o =>
+{
+    o.MaximumReceiveMessageSize = maxImageSize;
+})
+.AddMessagePackProtocol();
+
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddApplicationCors(builder.Configuration, myAllowSpecificOrigins, builder.Environment.IsDevelopment());
+
+builder.Services.AddSingleton<IImagePersistentService, ImagePersistentService>();
+builder.Services.AddSingleton<ISceneImageProcessor, SceneImageProcessor>();
+
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -18,6 +33,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseCors(myAllowSpecificOrigins);
 
-app.Run();
+app.MapControllers();
+app.MapHub<SceneSplitHub>("/hubs/scene-split");
+
+await app.RunAsync();

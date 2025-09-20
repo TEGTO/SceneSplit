@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SceneSplit.Backend\SceneSplit.Api\SceneSplit.Api.csproj" />
+    <ProjectReference Include="..\SceneSplit.TestShared\SceneSplit.TestShared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+
+</Project>

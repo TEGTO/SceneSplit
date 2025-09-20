@@ -1,9 +1,34 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36301.6 d17.14
+VisualStudioVersion = 17.14.36301.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Api", "SceneSplit.Api\SceneSplit.Api.csproj", "{91D0BD0B-D721-459B-852C-FD9BDCE419E1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\.dockerignore = ..\..\.dockerignore
+		..\..\.editorconfig = ..\..\.editorconfig
+		..\..\coverage.runsettings = ..\..\coverage.runsettings
+		..\..\Directory.Build.props = ..\..\Directory.Build.props
+		..\..\Directory.Packages.props = ..\..\Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F9804709-4F1A-4666-A5F8-FE762AFAFA81}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7F61A0FA-A587-461E-8628-DE342A9B8F57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infra", "infra", "{43DEF0D9-7BB2-4B14-901D-8420EB987CDB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Configuration", "SceneSplit.Configuration\SceneSplit.Configuration.csproj", "{26747F50-0247-41DA-A795-AF3EE9D5864A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{FCA762AF-9535-4BFF-B0F2-A0A1F5A3C76F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Api.UnitTests", "..\..\tests\SceneSplit.Api.UnitTests\SceneSplit.Api.UnitTests.csproj", "{4EE439E7-5C55-4479-36B0-A699B6F1A215}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.TestShared", "..\..\tests\SceneSplit.TestShared\SceneSplit.TestShared.csproj", "{38281AC1-ABCA-43B5-9529-10A61F55E13E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Cdk", "..\..\infra\SceneSplit.Cdk\SceneSplit.Cdk.csproj", "{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,9 +40,33 @@ Global
 		{91D0BD0B-D721-459B-852C-FD9BDCE419E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91D0BD0B-D721-459B-852C-FD9BDCE419E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91D0BD0B-D721-459B-852C-FD9BDCE419E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26747F50-0247-41DA-A795-AF3EE9D5864A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26747F50-0247-41DA-A795-AF3EE9D5864A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26747F50-0247-41DA-A795-AF3EE9D5864A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26747F50-0247-41DA-A795-AF3EE9D5864A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EE439E7-5C55-4479-36B0-A699B6F1A215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EE439E7-5C55-4479-36B0-A699B6F1A215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EE439E7-5C55-4479-36B0-A699B6F1A215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EE439E7-5C55-4479-36B0-A699B6F1A215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38281AC1-ABCA-43B5-9529-10A61F55E13E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38281AC1-ABCA-43B5-9529-10A61F55E13E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38281AC1-ABCA-43B5-9529-10A61F55E13E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38281AC1-ABCA-43B5-9529-10A61F55E13E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{91D0BD0B-D721-459B-852C-FD9BDCE419E1} = {F9804709-4F1A-4666-A5F8-FE762AFAFA81}
+		{26747F50-0247-41DA-A795-AF3EE9D5864A} = {F9804709-4F1A-4666-A5F8-FE762AFAFA81}
+		{FCA762AF-9535-4BFF-B0F2-A0A1F5A3C76F} = {7F61A0FA-A587-461E-8628-DE342A9B8F57}
+		{4EE439E7-5C55-4479-36B0-A699B6F1A215} = {FCA762AF-9535-4BFF-B0F2-A0A1F5A3C76F}
+		{38281AC1-ABCA-43B5-9529-10A61F55E13E} = {7F61A0FA-A587-461E-8628-DE342A9B8F57}
+		{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A} = {43DEF0D9-7BB2-4B14-901D-8420EB987CDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EEF3F48B-173E-4436-9539-B95BA6E6C5EA}

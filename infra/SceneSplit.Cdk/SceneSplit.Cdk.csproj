@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="Amazon.CDK.Lib" />
+    <PackageReference Include="Constructs" />
+    <PackageReference Include="Amazon.Jsii.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
