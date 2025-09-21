@@ -1,14 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { RouterModule, Routes } from '@angular/router';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { AppComponent, MainViewComponent } from '.';
-import { ConfigService } from '../shared';
 
 const routes: Routes = [
   {
@@ -39,14 +37,7 @@ const routes: Routes = [
   providers: [
     provideHttpClient(
       withInterceptorsFromDi(),
-    ),
-    provideAnimationsAsync(),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: (config: ConfigService) => () => config.load(),
-      deps: [ConfigService],
-      multi: true
-    }
+    )
   ],
   bootstrap: [AppComponent]
 })

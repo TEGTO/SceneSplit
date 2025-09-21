@@ -8,13 +8,7 @@ static class Program
     {
         var app = new App();
 
-        var props = new SceneSplitStackProps
-        {
-            FrontendDockerfileDirectory = "src/SceneSplit.Frontend",
-            FrontendDockerfileName = "Dockerfile"
-        };
-
-        _ = new SceneSplitStack(app, nameof(SceneSplitStack), props);
+        _ = new SceneSplitStack(app, nameof(SceneSplitStack), new SceneSplitStackProps());
         app.Synth();
     }
 }

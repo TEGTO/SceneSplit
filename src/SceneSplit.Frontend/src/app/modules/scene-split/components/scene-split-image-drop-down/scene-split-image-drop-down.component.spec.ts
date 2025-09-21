@@ -2,33 +2,26 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { sendSceneImageFile } from '../..';
-import { ConfigService } from '../../../shared';
+import { environment } from '../../../../../environments/environment';
 import { SceneSplitImageDropDownComponent } from './scene-split-image-drop-down.component';
 
 describe('SceneSplitImageDropDownComponent', () => {
   let component: SceneSplitImageDropDownComponent;
   let fixture: ComponentFixture<SceneSplitImageDropDownComponent>;
   let storeSpy: jasmine.SpyObj<Store>;
-  let configSpy: jasmine.SpyObj<ConfigService>;
 
   beforeEach(async () => {
     const storeMock = jasmine.createSpyObj('Store', ['dispatch']);
-    const configMock = jasmine.createSpyObj('ConfigService', [], {
-      maxSizeFile: 1024 * 1024 * 5,
-      allowedImageTypes: ['image/png', 'image/jpeg']
-    });
 
     await TestBed.configureTestingModule({
       imports: [ReactiveFormsModule],
       declarations: [SceneSplitImageDropDownComponent],
       providers: [
         { provide: Store, useValue: storeMock },
-        { provide: ConfigService, useValue: configMock }
       ]
     }).compileComponents();
 
     storeSpy = TestBed.inject(Store) as jasmine.SpyObj<Store>;
-    configSpy = TestBed.inject(ConfigService) as jasmine.SpyObj<ConfigService>;
 
     fixture = TestBed.createComponent(SceneSplitImageDropDownComponent);
     component = fixture.componentInstance;
@@ -61,7 +54,7 @@ describe('SceneSplitImageDropDownComponent', () => {
 
   it('should show error if file exceeds max size', () => {
     const largeFile = new File(['dummy'], 'large.png', { type: 'image/png' });
-    Object.defineProperty(largeFile, 'size', { value: configSpy.maxSizeFile + 1 });
+    Object.defineProperty(largeFile, 'size', { value: environment.maxFileSize + 1 });
 
     const event = { target: { files: [largeFile] } } as unknown as Event;
 
@@ -95,6 +88,6 @@ describe('SceneSplitImageDropDownComponent', () => {
   });
 
   it('fileSizeStr should return formatted string', () => {
-    expect(component.fileSizeStr).toBe(`${configSpy.maxSizeFile / (1024 * 1024)}MB`);
+    expect(component.fileSizeStr).toBe(`${environment.maxFileSize / (1024 * 1024)}MB`);
   });
 });

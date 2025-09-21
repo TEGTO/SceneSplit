@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import * as signalR from '@microsoft/signalr';
-import { ConfigService } from '../../../shared';
 import { SceneSplitHubClientService } from './scene-split-hub-client.service';
 
 describe('SceneSplitHubClientService', () => {
@@ -22,7 +21,6 @@ describe('SceneSplitHubClientService', () => {
     TestBed.configureTestingModule({
       providers: [
         SceneSplitHubClientService,
-        { provide: ConfigService, useValue: { hubUrl: 'http://test-hub' } }
       ]
     });
 

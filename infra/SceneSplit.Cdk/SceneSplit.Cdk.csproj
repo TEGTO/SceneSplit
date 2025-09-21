@@ -1,9 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<RollForward>Major</RollForward>
+	</PropertyGroup>
+
+	<ItemGroup>
     <PackageReference Include="Amazon.CDK.Lib" />
     <PackageReference Include="Constructs" />
     <PackageReference Include="Amazon.Jsii.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SceneSplit.Backend\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
   </ItemGroup>
 
 </Project>

@@ -23,6 +23,9 @@ builder.Services.AddSingleton<IImagePersistentService, ImagePersistentService>()
 builder.Services.AddSingleton<ISceneImageProcessor, SceneImageProcessor>();
 
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -37,5 +40,7 @@ app.UseCors(myAllowSpecificOrigins);
 
 app.MapControllers();
 app.MapHub<SceneSplitHub>("/hubs/scene-split");
+
+app.MapHealthChecks("/health");
 
 await app.RunAsync();

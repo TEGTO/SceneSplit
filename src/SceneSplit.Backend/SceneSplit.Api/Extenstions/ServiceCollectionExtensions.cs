@@ -13,10 +13,19 @@ public static class ServiceCollectionExtensions
         {
             options.AddPolicy(name: allowSpecificOrigins, policy =>
             {
-                policy.WithOrigins(allowedOrigins)
-                    .AllowAnyHeader()
-                    .AllowCredentials()
-                    .AllowAnyMethod();
+                if (allowedOrigins.Contains("*"))
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                }
+                else
+                {
+                    policy.WithOrigins(allowedOrigins)
+                          .AllowAnyHeader()
+                          .AllowCredentials()
+                          .AllowAnyMethod();
+                }
 
                 if (isDevelopment)
                 {

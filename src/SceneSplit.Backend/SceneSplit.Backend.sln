@@ -30,6 +30,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.TestShared", "..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Cdk", "..\..\infra\SceneSplit.Cdk\SceneSplit.Cdk.csproj", "{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dockerfiles", "Dockerfiles", "{F1459744-52F8-4C48-9C54-A26AF724FF04}"
+	ProjectSection(SolutionItems) = preProject
+		ApiDockerfile = ApiDockerfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,6 +72,7 @@ Global
 		{4EE439E7-5C55-4479-36B0-A699B6F1A215} = {FCA762AF-9535-4BFF-B0F2-A0A1F5A3C76F}
 		{38281AC1-ABCA-43B5-9529-10A61F55E13E} = {7F61A0FA-A587-461E-8628-DE342A9B8F57}
 		{5D9ABD48-5FA8-0CE7-5B82-3A1C0E4E1C0A} = {43DEF0D9-7BB2-4B14-901D-8420EB987CDB}
+		{F1459744-52F8-4C48-9C54-A26AF724FF04} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EEF3F48B-173E-4436-9539-B95BA6E6C5EA}
