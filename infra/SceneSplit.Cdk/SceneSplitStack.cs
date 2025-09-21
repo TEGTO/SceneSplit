@@ -40,7 +40,7 @@ public class SceneSplitStack : Stack
         AddApiGateway();
 
         //var apiHubEndpoint = $"{apiGateway.Url}hubs/scene-split/";
-        var apiHubEndpoint = $"http://{apiAlbService.LoadBalancer.LoadBalancerDnsName}:8080/hubs/scene-split/";
+        var apiHubEndpoint = $"http://{apiAlbService.LoadBalancer.LoadBalancerDnsName}/hubs/scene-split/";
         AddFrontend(cluster, apiHubEndpoint);
     }
 
