@@ -43,4 +43,6 @@ app.MapHub<SceneSplitHub>("/hubs/scene-split");
 
 app.MapHealthChecks("/health");
 
+app.UsePathBase("/api");
+
 await app.RunAsync();

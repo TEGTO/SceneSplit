@@ -6,7 +6,10 @@
 }
 
 .image-wrapper {
-    grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(256px, max-content));
+    justify-content: center;
+    gap: 1.5rem;
 
     .image-wrapper__row {
         min-width: utils.pxToRem(256);

@@ -3,7 +3,7 @@ import * as signalR from '@microsoft/signalr';
 import * as signalRMsgPack from '@microsoft/signalr-protocol-msgpack';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { mapObjectImageResponseToObjectImage, ObjectImage, ObjectImageResponse, SendSceneImageRequest } from '../..';
-import { environment } from '../../../../../environments/environment.prod';
+import { environment } from '../../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
