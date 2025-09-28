@@ -192,10 +192,35 @@ jobs:
           name: backend-publish
           path: ./publish
 
+  cdk-synth:
+    name: CDK Synth
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: CDK Synth
+        run: cdk synth
+
   deploy:
     name: Deploy (CDK)
     runs-on: ubuntu-latest
-    needs: [frontend-ci, backend-ci]
+    needs: [frontend-ci, backend-ci, cdk-synth]
     if: github.ref == 'refs/heads/main'
 
     steps:
@@ -220,10 +245,7 @@ jobs:
       - name: CDK Bootstrap
         run: cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.AWS_REGION }}
 
-      - name: CDK Synth
-        run: cdk synth
-
-      - name: Deploy infrastructure with CDK
+      - name: CDK Deploy
         run: cdk deploy --require-approval never
 
   destroy:
