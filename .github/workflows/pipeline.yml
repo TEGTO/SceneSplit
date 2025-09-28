@@ -103,10 +103,18 @@ jobs:
 
       - name: Run integration tests
         run: |
-          dotnet test tests/*/*.IntegrationTests.csproj \
-            --configuration Release \
-            --logger "junit;LogFilePath=./TestResults/integration-tests.xml" \
-            --results-directory ./TestResults
+          projects=$(ls tests/*/*.IntegrationTests.csproj 2>/dev/null || true)
+          if [ -z "$projects" ]; then
+            echo " No integration test projects found. Skipping..."
+          else
+            for proj in $projects; do
+              echo "▶Running integration tests for $proj"
+              dotnet test "$proj" \
+                --configuration Release \
+                --logger "junit;LogFilePath=./TestResults/$(basename $proj)-results.xml" \
+                --results-directory ./TestResults
+            done
+          fi
 
       - name: Publish backend
         run: dotnet publish src/SceneSplit.Backend/SceneSplit.Backend.sln -c Release -o ./publish
