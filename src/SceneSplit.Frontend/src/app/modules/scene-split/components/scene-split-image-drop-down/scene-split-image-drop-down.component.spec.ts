@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -89,5 +90,32 @@ describe('SceneSplitImageDropDownComponent', () => {
 
   it('fileSizeStr should return formatted string', () => {
     expect(component.fileSizeStr).toBe(`${environment.maxFileSize / (1024 * 1024)}MB`);
+  });
+
+  it('should set isDragging true on dragover', () => {
+    const dragEvent = new DragEvent('dragover');
+    component.onDragOver(dragEvent);
+    expect(component.isDragging).toBeTrue();
+  });
+
+  it('should set isDragging false on dragleave', () => {
+    const dragEvent = new DragEvent('dragleave');
+    component.onDragLeave(dragEvent);
+    expect(component.isDragging).toBeFalse();
+  });
+
+  it('should handle file drop correctly', () => {
+    const mockFile = new File(['dummy'], 'file.png', { type: 'image/png' });
+    const dragEvent = new DragEvent('drop', {
+      dataTransfer: new DataTransfer()
+    });
+    dragEvent.dataTransfer?.items.add(mockFile);
+
+    spyOn(component as any, 'handleFile');
+
+    component.onFileDropped(dragEvent);
+
+    expect(component.isDragging).toBeFalse();
+    expect((component as any).handleFile).toHaveBeenCalledWith(mockFile);
   });
 });
