@@ -1,9 +1,15 @@
 @use 'utils' as utils;
 
 .wrapper {
-    width: utils.pxToRem(750);
-
     .wrapper__form-container {
-        width: utils.pxToRem(350);
+        .border-dashed {
+            min-height: utils.pxToRem(250px);
+        }
+
+        img {
+            max-width: 100%;
+            max-height: utils.pxToRem(320px);
+            object-fit: contain;
+        }
     }
 }

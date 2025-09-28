@@ -11,9 +11,17 @@ public class FrontendServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService Service { get; }
 
-    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, string apiHubEndpoint)
+    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, string apiEndpoint, ISecurityGroup apiSecGroup, Vpc vpc)
         : base(scope, id)
     {
+        var frontendSecGroup = new SecurityGroup(this, "FrontendServiceSecurityGroup", new SecurityGroupProps
+        {
+            AllowAllOutbound = true,
+            Vpc = vpc
+        });
+
+        apiSecGroup.AddIngressRule(frontendSecGroup, Port.Tcp(8080), "Allow frontend to access API");
+
         Service = new ApplicationLoadBalancedFargateService(this, "FrontendService", new ApplicationLoadBalancedFargateServiceProps
         {
             Cluster = cluster,
@@ -31,7 +39,7 @@ public class FrontendServiceConstruct : Construct
                 ContainerPort = 80,
                 Environment = new Dictionary<string, string>
                 {
-                    { "HUB_URL", apiHubEndpoint }
+                    { "HUB_URL", apiEndpoint }
                 },
                 LogDriver = LogDriver.AwsLogs(new AwsLogDriverProps
                 {
@@ -42,8 +50,8 @@ public class FrontendServiceConstruct : Construct
             Cpu = 512,
             ServiceName = "frontend",
             PublicLoadBalancer = true,
-            AssignPublicIp = true,
-            TaskSubnets = new SubnetSelection { SubnetType = SubnetType.PUBLIC },
+            TaskSubnets = new SubnetSelection { SubnetType = SubnetType.PRIVATE_WITH_EGRESS },
+            SecurityGroups = [frontendSecGroup],
             HealthCheck = TaskHelpers.AddHealthCheckForTask("80/health"),
             MinHealthyPercent = 100,
             MaxHealthyPercent = 200

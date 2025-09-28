@@ -11,8 +11,6 @@ namespace SceneSplit.Cdk;
 
 public class SceneSplitStack : Stack
 {
-    private const string SERVICE_NAMESPACE = "scene-split";
-
     internal SceneSplitStack(Construct scope, string id, IStackProps props = null!) : base(scope, id, props)
     {
         var vpc = new Vpc(this, "Vpc", new VpcProps { MaxAzs = 2 });
@@ -23,7 +21,7 @@ public class SceneSplitStack : Stack
             ClusterName = "scene-split-cluster",
             DefaultCloudMapNamespace = new CloudMapNamespaceOptions
             {
-                Name = SERVICE_NAMESPACE,
+                Name = "scene-split",
                 Type = NamespaceType.DNS_PRIVATE,
                 Vpc = vpc
             },
@@ -31,7 +29,8 @@ public class SceneSplitStack : Stack
 
         var apiService = new ApiServiceConstruct(this, "ApiServiceConstruct", cluster, vpc);
 
-        var apiHubEndpoint = $"http://{apiService.Service.LoadBalancer.LoadBalancerDnsName}";
-        _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, apiHubEndpoint!);
+        var apiEndpoint = $"http://{apiService.Service.LoadBalancer.LoadBalancerDnsName}";
+        _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, apiEndpoint,
+            apiService.Service.Service.Connections.SecurityGroups[0], vpc);
     }
 }

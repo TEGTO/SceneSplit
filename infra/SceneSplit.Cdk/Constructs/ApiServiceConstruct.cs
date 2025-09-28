@@ -2,7 +2,6 @@
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
-using Amazon.CDK.AWS.ServiceDiscovery;
 using Constructs;
 using SceneSplit.Cdk.Helpers;
 using SceneSplit.Configuration;
@@ -21,8 +20,6 @@ public class ApiServiceConstruct : Construct
             AllowAllOutbound = true,
             Vpc = vpc
         });
-
-        apiSecGroup.Connections.AllowFrom(Peer.AnyIpv4(), Port.Tcp(8080));
 
         Service = new ApplicationLoadBalancedFargateService(this, "ApiService", new ApplicationLoadBalancedFargateServiceProps
         {
@@ -50,14 +47,8 @@ public class ApiServiceConstruct : Construct
             SecurityGroups = [apiSecGroup],
             MemoryLimitMiB = 1024,
             Cpu = 512,
-            PublicLoadBalancer = true,
+            PublicLoadBalancer = false,
             ServiceName = "api",
-            CloudMapOptions = new CloudMapOptions
-            {
-                Name = "api",
-                DnsRecordType = DnsRecordType.A,
-                DnsTtl = Duration.Seconds(60)
-            },
             HealthCheck = TaskHelpers.AddHealthCheckForTask("8080/health"),
             MinHealthyPercent = 100,
             MaxHealthyPercent = 200

@@ -9,15 +9,11 @@ jobs:
   destroy:
     name: Destroy (CDK)
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Abort if not main
-        if: github.ref != 'refs/heads/main'
-        run: |
-          echo "Destroy can only be run on main branch!"
-          exit 1
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
