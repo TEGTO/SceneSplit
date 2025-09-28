@@ -108,7 +108,8 @@
                 "src/app/styles/partials"
               ]
             },
-            "scripts": []
+            "scripts": [],
+            "karmaConfig": "karma.conf.js"
           }
         },
         "lint": {

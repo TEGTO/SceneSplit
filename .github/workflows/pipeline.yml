@@ -57,6 +57,30 @@ jobs:
           name: frontend-coverage
           path: src/SceneSplit.Frontend/coverage
 
+      - name: Code Coverage Summary Report (Frontend)
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: src/SceneSplit.Frontend/coverage/cobertura-coverage.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: "60 80"
+
+      - name: Read frontend coverage markdown
+        id: frontend-coverage
+        run: echo "FRONTEND_COVERAGE_REPORT<<EOF" >> $GITHUB_ENV && cat code-coverage-results.md >> $GITHUB_ENV && echo "EOF" >> $GITHUB_ENV
+
+      - name: Add Frontend Coverage Comment to PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: "## Frontend Code Coverage"
+          message: ${{ env.FRONTEND_COVERAGE_REPORT }}
+
       - name: Build Angular project
         run: npm run build -- --configuration production
         working-directory: src/SceneSplit.Frontend
