@@ -79,7 +79,11 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: "## Frontend Code Coverage"
-          message: ${{ env.FRONTEND_COVERAGE_REPORT }}
+          message: |
+            ### ✅ Frontend Test Coverage
+            Here are the results from the frontend tests:
+
+            ${{ env.FRONTEND_COVERAGE_REPORT }}
 
       - name: Build Angular project
         run: npm run build -- --configuration production
