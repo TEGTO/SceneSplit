@@ -127,6 +127,7 @@ jobs:
           path: ./TestResults
 
       - name: Code Coverage Summary Report
+        id: coverage
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: TestResults/**/coverage.cobertura.xml
@@ -138,6 +139,13 @@ jobs:
           indicators: true
           output: both
           thresholds: "60 80"
+
+      - name: Add Coverage Comment to PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: "## Backend Code Coverage"
+          message: ${{ steps.coverage.outputs.markdown }}
 
       - name: Upload backend publish build
         uses: actions/upload-artifact@v4
