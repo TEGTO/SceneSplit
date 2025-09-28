@@ -74,8 +74,8 @@ internal class SceneSplitHubTests
     public async Task OnDisconnectedAsync_RemovesClientFromGroupAndUserImagesIfLastConnection()
     {
         // Arrange
-        var userId = "user1";
-        var connectionId = "connection1";
+        var userId = "user2";
+        var connectionId = "connection2";
         var objectImages = new List<ObjectImage> { new() { ImageUrl = "some-url", Description = "some-img" } };
 
         var connectionToUser = typeof(SceneSplitHub).GetStaticFieldValue<ConcurrentDictionary<string, string>>("connectionToUser");

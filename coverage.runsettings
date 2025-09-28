@@ -23,6 +23,7 @@
 		<ModulePath>.*Serilog.*</ModulePath>
 		<ModulePath>.*StackExchange.*</ModulePath>
 		<ModulePath>.*\\coverlet.collector.*</ModulePath>
+		<ModulePath>.*SceneSplit\.TestShared.*</ModulePath>
               </Exclude>
             </ModulePaths>
 

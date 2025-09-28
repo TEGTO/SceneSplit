@@ -1,0 +1,247 @@
+name: CI/CD Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: write-all
+
+jobs:
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: "20.x"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          lfs: false
+
+      - name: Cache Node.js dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm install --force
+        working-directory: src/SceneSplit.Frontend
+
+      - name: Run unit tests with coverage
+        run: npm run test:ci -- --code-coverage
+        working-directory: src/SceneSplit.Frontend
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: src/SceneSplit.Frontend/coverage
+
+      - name: Code Coverage Summary Report (Frontend)
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: src/SceneSplit.Frontend/coverage/cobertura-coverage.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: "60 80"
+
+      - name: Read frontend coverage markdown
+        id: frontend-coverage
+        run: echo "FRONTEND_COVERAGE_REPORT<<EOF" >> $GITHUB_ENV && cat code-coverage-results.md >> $GITHUB_ENV && echo "EOF" >> $GITHUB_ENV
+
+      - name: Add Frontend Coverage Comment to PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: "## Frontend Code Coverage"
+          message: |
+            ### 🧪 Frontend Test Coverage
+            ${{ env.FRONTEND_COVERAGE_REPORT }}
+
+      - name: Build Angular project
+        run: npm run build -- --configuration production
+        working-directory: src/SceneSplit.Frontend
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: src/SceneSplit.Frontend/dist
+
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_VERSION: "8.0.x"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build backend solution
+        run: dotnet build src/SceneSplit.Backend/SceneSplit.Backend.sln --configuration Release
+
+      - name: Run unit tests with coverage
+        run: |
+          dotnet test tests/*/*.UnitTests.csproj \
+            --configuration Release \
+            --logger "junit;LogFilePath=./TestResults/unit-tests.xml" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults
+
+      - name: Run integration tests
+        run: |
+          projects=$(ls tests/*/*.IntegrationTests.csproj 2>/dev/null || true)
+          if [ -z "$projects" ]; then
+            echo " No integration test projects found. Skipping..."
+          else
+            for proj in $projects; do
+              echo "▶Running integration tests for $proj"
+              dotnet test "$proj" \
+                --configuration Release \
+                --logger "junit;LogFilePath=./TestResults/$(basename $proj)-results.xml" \
+                --results-directory ./TestResults
+            done
+          fi
+
+      - name: Publish backend
+        run: dotnet publish src/SceneSplit.Backend/SceneSplit.Backend.sln -c Release -o ./publish
+
+      - name: Generate HTML Coverage Report
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          reportgenerator \
+            -reports:TestResults/**/coverage.cobertura.xml \
+            -targetdir:TestResults/CoverageReport \
+            -reporttypes:Html
+
+      - name: Upload HTML Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: TestResults/CoverageReport
+
+      - name: Code Coverage Summary Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: TestResults/**/coverage.cobertura.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: "60 80"
+
+      - name: Read coverage markdown
+        id: coverage
+        run: echo "COVERAGE_REPORT<<EOF" >> $GITHUB_ENV && cat code-coverage-results.md >> $GITHUB_ENV && echo "EOF" >> $GITHUB_ENV
+
+      - name: Add Coverage Comment to PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: "## Backend Code Coverage"
+          message: |
+            ### 🧪 Backend Test Coverage
+            ${{ env.COVERAGE_REPORT }}
+
+      - name: Upload backend publish build
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-publish
+          path: ./publish
+
+  deploy:
+    name: Deploy (CDK)
+    runs-on: ubuntu-latest
+    needs: [frontend-ci, backend-ci]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy infrastructure with CDK
+        run: cdk deploy --require-approval never
+
+  destroy:
+    name: Destroy (CDK)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Destroy infrastructure with CDK
+        run: cdk destroy --force
