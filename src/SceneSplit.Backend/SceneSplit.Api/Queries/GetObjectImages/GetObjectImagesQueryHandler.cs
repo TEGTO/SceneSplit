@@ -1,11 +1,11 @@
-﻿
+﻿using MediatR;
 using SceneSplit.Api.Domain.Models;
 
-namespace SceneSplit.Api.Sevices.ImagePersistent;
+namespace SceneSplit.Api.Queries.GetObjectImages;
 
-public class ImagePersistentService : IImagePersistentService
+public class GetObjectImagesQueryHandler : IRequestHandler<GetObjectImagesQuery, ICollection<ObjectImage>>
 {
-    public Task<ICollection<ObjectImage>> GetObjectImagesForUserAsync(string userId, CancellationToken cancellationToken = default)
+    public Task<ICollection<ObjectImage>> Handle(GetObjectImagesQuery request, CancellationToken cancellationToken)
     {
         return Task.FromResult<ICollection<ObjectImage>>(
         [
@@ -20,10 +20,5 @@ public class ImagePersistentService : IImagePersistentService
                 Description = "A portrait"
             }
         ]);
-    }
-
-    public Task UpdateObjectImagesForUserAsync(string userId, ICollection<ObjectImage> images, CancellationToken cancellationToken = default)
-    {
-        return Task.CompletedTask;
     }
 }

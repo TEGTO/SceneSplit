@@ -46,8 +46,8 @@ public class FrontendServiceConstruct : Construct
                     StreamPrefix = "frontendServiceLogs"
                 }),
             },
-            MemoryLimitMiB = 1024,
-            Cpu = 512,
+            MemoryLimitMiB = 512,
+            Cpu = 256,
             ServiceName = "frontend",
             PublicLoadBalancer = true,
             TaskSubnets = new SubnetSelection { SubnetType = SubnetType.PRIVATE_WITH_EGRESS },

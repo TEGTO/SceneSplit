@@ -2,8 +2,6 @@
 using Moq;
 using SceneSplit.Api.Domain.Models;
 using SceneSplit.Api.Sdk.Contracts;
-using SceneSplit.Api.Sevices.ImagePersistent;
-using SceneSplit.Api.Sevices.SceneImageProcessor;
 using SceneSplit.TestShared.Extenstions;
 using System.Collections.Concurrent;
 

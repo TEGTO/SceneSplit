@@ -1,16 +1,14 @@
 ﻿{
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "SceneSplit.Api": {
+    "SceneSplit.ImageCompression.Api": {
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:5162",
+      "applicationUrl": "https://localhost:5163",
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        "Logging__LogLevel__Default": "Debug",
-        "COMPRESSION_API_URL": "https://localhost:5163",
-        "SCENE_IMAGE_BUCKET": "scene-split-scene-images"
+        "Logging__LogLevel__Default": "Debug"
       }
     }
   }

@@ -1,14 +1,16 @@
 ﻿using Mapster;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
+using SceneSplit.Api.Commands.ProcessSceneImage;
+using SceneSplit.Api.Commands.UpdateObjectImages;
 using SceneSplit.Api.Domain.Models;
+using SceneSplit.Api.Queries.GetObjectImages;
 using SceneSplit.Api.Sdk.Contracts;
-using SceneSplit.Api.Sevices.ImagePersistent;
-using SceneSplit.Api.Sevices.SceneImageProcessor;
 using System.Collections.Concurrent;
 
 namespace SceneSplit.Api.Hubs;
 
-public class SceneSplitHub(IImagePersistentService imagePersistent, ISceneImageProcessor sceneImageProcessor) : Hub<ISceneSplitHubClient>
+public class SceneSplitHub(IMediator mediator) : Hub<ISceneSplitHubClient>
 {
     private static readonly ConcurrentDictionary<string, ICollection<ObjectImage>> userObjectImages = new();
     private static readonly ConcurrentDictionary<string, string> connectionToUser = new();
@@ -21,7 +23,7 @@ public class SceneSplitHub(IImagePersistentService imagePersistent, ISceneImageP
 
         var images = userObjectImages.GetOrAdd(userId, (uid) =>
         {
-            var imgs = imagePersistent.GetObjectImagesForUserAsync(uid).Result;
+            var imgs = mediator.Send(new GetObjectImagesQuery(uid)).Result;
             return imgs;
         });
 
@@ -47,7 +49,7 @@ public class SceneSplitHub(IImagePersistentService imagePersistent, ISceneImageP
 
     public async Task UpdateImagesForUser(string userId, ICollection<ObjectImage> images)
     {
-        await imagePersistent.UpdateObjectImagesForUserAsync(userId, images);
+        await mediator.Send(new UpdateObjectImagesCommand(userId, images));
 
         if (connectionToUser.Values.Contains(userId))
         {
@@ -58,6 +60,6 @@ public class SceneSplitHub(IImagePersistentService imagePersistent, ISceneImageP
 
     public async Task UploadSceneImageForUser(string userId, SendSceneImageRequest request)
     {
-        await sceneImageProcessor.ProcessSceneImageForUserAsync(userId, request.FileName, request.FileContent);
+        await mediator.Send(new ProcessSceneImageCommand(userId, request.FileName, request.FileContent));
     }
 }
