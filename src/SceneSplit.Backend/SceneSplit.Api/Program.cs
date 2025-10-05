@@ -1,4 +1,5 @@
 ﻿using Amazon.S3;
+using Amazon.S3.Transfer;
 using Grpc.Net.Client.Web;
 using SceneSplit.Api.Extenstions;
 using SceneSplit.Api.Hubs;
@@ -33,7 +34,7 @@ builder.Services.AddGrpcClient<Compression.CompressionClient>(o =>
 .AddInterceptor<GrpcErrorInterceptor>()
 .AddInterceptor<GrpcResilienceInterceptor>()
 .AddResilienceHandler()
-.ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(new HttpClientHandler()));
+.ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(GrpcWebMode.GrpcWeb, new HttpClientHandler()));
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
@@ -42,7 +43,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddAWSService<IAmazonS3>();
-builder.Services.AddScoped<IStorageService, S3StorageService>();
+builder.Services.AddSingleton<ITransferUtility>(sp =>
+{
+    var s3 = sp.GetRequiredService<IAmazonS3>();
+    return new TransferUtility(s3);
+});
+builder.Services.AddSingleton<IStorageService, S3StorageService>();
 
 var app = builder.Build();
 

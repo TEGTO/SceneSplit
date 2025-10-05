@@ -1,16 +1,21 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Moq;
+using SceneSplit.Api.Commands.ProcessSceneImage;
+using SceneSplit.Api.Commands.UpdateObjectImages;
 using SceneSplit.Api.Domain.Models;
+using SceneSplit.Api.Hubs;
+using SceneSplit.Api.Queries.GetObjectImages;
 using SceneSplit.Api.Sdk.Contracts;
 using SceneSplit.TestShared.Extenstions;
 using System.Collections.Concurrent;
 
-namespace SceneSplit.Api.Hubs.Tests;
+namespace SceneSplit.Api.UnitTests.Hubs;
 
-internal class SceneSplitHubTests
+[TestFixture]
+public class SceneSplitHubTests
 {
-    private Mock<IImagePersistentService> mockImagePersistent;
-    private Mock<ISceneImageProcessor> mockSceneImageProcessor;
+    private Mock<IMediator> mockMediator;
     private Mock<HubCallerContext> mockContext;
     private Mock<IGroupManager> mockGroups;
     private Mock<ISceneSplitHubClient> mockClients;
@@ -21,8 +26,7 @@ internal class SceneSplitHubTests
     [SetUp]
     public void Setup()
     {
-        mockImagePersistent = new Mock<IImagePersistentService>();
-        mockSceneImageProcessor = new Mock<ISceneImageProcessor>();
+        mockMediator = new Mock<IMediator>();
         mockContext = new Mock<HubCallerContext>();
         mockGroups = new Mock<IGroupManager>();
         mockClients = new Mock<ISceneSplitHubClient>();
@@ -30,7 +34,7 @@ internal class SceneSplitHubTests
         mockHubCallerClients = new Mock<IHubCallerClients<ISceneSplitHubClient>>();
         mockHubCallerClients.Setup(c => c.Caller).Returns(mockClients.Object);
 
-        sceneSplitHub = new SceneSplitHub(mockImagePersistent.Object, mockSceneImageProcessor.Object)
+        sceneSplitHub = new SceneSplitHub(mockMediator.Object)
         {
             Context = mockContext.Object,
             Groups = mockGroups.Object,
@@ -53,7 +57,8 @@ internal class SceneSplitHubTests
         var objectImages = new List<ObjectImage> { new() { ImageUrl = "some-url", Description = "some-img" } };
 
         mockContext.SetupGet(c => c.ConnectionId).Returns(connectionId);
-        mockImagePersistent.Setup(s => s.GetObjectImagesForUserAsync(userId, It.IsAny<CancellationToken>())).ReturnsAsync(objectImages);
+        mockMediator.Setup(m => m.Send(It.IsAny<GetObjectImagesQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(objectImages);
 
         // Act
         await sceneSplitHub.StartListenToUserObjectImages(userId);
@@ -123,7 +128,7 @@ internal class SceneSplitHubTests
         await sceneSplitHub.UpdateImagesForUser(userId, images);
 
         // Assert
-        mockImagePersistent.Verify(s => s.UpdateObjectImagesForUserAsync(userId, images, It.IsAny<CancellationToken>()), Times.Once);
+        mockMediator.Verify(m => m.Send(It.Is<UpdateObjectImagesCommand>(q => q.UserId == userId), It.IsAny<CancellationToken>()), Times.Once);
         mockClients.Verify(c => c.ReceiveImageLinks(It.Is<ICollection<ObjectImageResponse>>(imgs => imgs.Count == 1)), Times.Once);
 
         var userObjectImages = typeof(SceneSplitHub).GetStaticFieldValue<ConcurrentDictionary<string, ICollection<ObjectImage>>>("userObjectImages");
@@ -143,8 +148,7 @@ internal class SceneSplitHubTests
         await sceneSplitHub.UploadSceneImageForUser(userId, request);
 
         // Assert
-        mockSceneImageProcessor.Verify(p => p.ProcessSceneImageForUserAsync(
-            userId, request.FileName, request.FileContent, It.IsAny<CancellationToken>()), Times.Once);
+        mockMediator.Verify(m => m.Send(It.IsAny<ProcessSceneImageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -174,5 +178,63 @@ internal class SceneSplitHubTests
         // Assert
         mockGroups.Verify(g => g.RemoveFromGroupAsync(connectionId1, userId, default), Times.Once);
         Assert.That(userObjectImages.ContainsKey(userId), Is.True);
+    }
+
+    [Test]
+    public async Task StartListenToUserObjectImages_WhenCalledTwice_UsesCachedImagesAndDoesNotCallMediatorAgain()
+    {
+        // Arrange
+        var userId = "user-cache-test";
+        var connectionId1 = "conn1";
+        var connectionId2 = "conn2";
+
+        var objectImages = new List<ObjectImage>
+        {
+            new() { ImageUrl = "cached-url", Description = "img1" }
+        };
+
+        mockMediator.Setup(m => m.Send(It.IsAny<GetObjectImagesQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(objectImages);
+
+        mockContext.SetupGet(c => c.ConnectionId).Returns(connectionId1);
+
+        // Act
+        await sceneSplitHub.StartListenToUserObjectImages(userId);
+
+        // Assert
+        mockMediator.Verify(m => m.Send(It.IsAny<GetObjectImagesQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+
+        // Act
+        mockContext.SetupGet(c => c.ConnectionId).Returns(connectionId2);
+        await sceneSplitHub.StartListenToUserObjectImages(userId);
+
+        // Assert
+        mockMediator.Verify(m => m.Send(It.IsAny<GetObjectImagesQuery>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockGroups.Verify(g => g.AddToGroupAsync(connectionId2, userId, default), Times.Once);
+    }
+
+    [Test]
+    public async Task OnDisconnectedAsync_WhenConnectionIdNotTracked_ReturnsWithoutRemovingGroup()
+    {
+        // Arrange
+        var nonExistingConnection = "conn-not-tracked";
+        mockContext.SetupGet(c => c.ConnectionId).Returns(nonExistingConnection);
+
+        var connectionToUser = typeof(SceneSplitHub)
+            .GetStaticFieldValue<ConcurrentDictionary<string, string>>("connectionToUser");
+        var userObjectImages = typeof(SceneSplitHub)
+            .GetStaticFieldValue<ConcurrentDictionary<string, ICollection<ObjectImage>>>("userObjectImages");
+
+        connectionToUser?.Clear();
+        userObjectImages?.Clear();
+
+        // Act
+        await sceneSplitHub.OnDisconnectedAsync(null);
+
+        // Assert
+        mockGroups.Verify(g => g.RemoveFromGroupAsync(It.IsAny<string>(), It.IsAny<string>(), default), Times.Never);
+
+        Assert.That(connectionToUser?.Count, Is.EqualTo(0));
+        Assert.That(userObjectImages?.Count, Is.EqualTo(0));
     }
 }

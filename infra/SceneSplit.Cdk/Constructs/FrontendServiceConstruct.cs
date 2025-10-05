@@ -11,7 +11,7 @@ public class FrontendServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService Service { get; }
 
-    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, string apiEndpoint, ISecurityGroup apiSecGroup, Vpc vpc)
+    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string apiEndpoint, ISecurityGroup apiSecGroup)
         : base(scope, id)
     {
         var frontendSecGroup = new SecurityGroup(this, "FrontendServiceSecurityGroup", new SecurityGroupProps
@@ -24,6 +24,7 @@ public class FrontendServiceConstruct : Construct
 
         Service = new ApplicationLoadBalancedFargateService(this, "FrontendService", new ApplicationLoadBalancedFargateServiceProps
         {
+            ServiceName = "scene-split-frontend",
             Cluster = cluster,
             DesiredCount = 1,
             TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
@@ -48,7 +49,6 @@ public class FrontendServiceConstruct : Construct
             },
             MemoryLimitMiB = 512,
             Cpu = 256,
-            ServiceName = "frontend",
             PublicLoadBalancer = true,
             TaskSubnets = new SubnetSelection { SubnetType = SubnetType.PRIVATE_WITH_EGRESS },
             SecurityGroups = [frontendSecGroup],

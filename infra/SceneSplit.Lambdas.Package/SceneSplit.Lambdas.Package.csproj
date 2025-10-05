@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Configuration>Release</Configuration>
+		<Framework>net8.0</Framework>
+		<PublishDir>..\publish</PublishDir>
+	</PropertyGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+
+		<Exec
+		  Command='dotnet lambda package --configuration $(Configuration) --framework $(Framework) --verbose --output-package "$(PublishDir)\SceneSplit.ImageCompression.Api.zip"'
+		  WorkingDirectory='..\..\src\SceneSplit.Backend\SceneSplit.ImageCompression.Api'
+		  ConsoleToMSBuild='true' />
+
+	</Target>
+
+</Project>

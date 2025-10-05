@@ -14,6 +14,7 @@ COPY Directory.Packages.props .
 
 COPY src/SceneSplit.Backend/SceneSplit.Api ./SceneSplit.Api
 COPY src/SceneSplit.Backend/SceneSplit.Configuration ./SceneSplit.Configuration
+COPY src/SceneSplit.Backend/SceneSplit.ImageCompression.Sdk ./SceneSplit.ImageCompression.Sdk
 
 WORKDIR /src/SceneSplit.Api
 RUN dotnet restore "SceneSplit.Api.csproj"

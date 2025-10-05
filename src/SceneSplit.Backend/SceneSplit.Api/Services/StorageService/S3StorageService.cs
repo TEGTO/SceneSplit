@@ -1,6 +1,4 @@
-﻿using Amazon.S3;
-using Amazon.S3.Model;
-using Amazon.S3.Transfer;
+﻿using Amazon.S3.Transfer;
 using SceneSplit.Configuration;
 
 namespace SceneSplit.Api.Services.StorageService;
@@ -9,12 +7,12 @@ public class S3StorageService : IStorageService
 {
     private const string USER_ID_TAG = "UserId";
 
-    private readonly IAmazonS3 s3Client;
+    private readonly ITransferUtility transferUtility;
     private readonly string bucketName;
 
-    public S3StorageService(IAmazonS3 s3Client, IConfiguration configuration)
+    public S3StorageService(ITransferUtility transferUtility, IConfiguration configuration)
     {
-        this.s3Client = s3Client;
+        this.transferUtility = transferUtility ?? throw new ArgumentNullException(nameof(transferUtility));
         bucketName = configuration[ApiConfigurationKeys.SCENE_IMAGE_BUCKET]
             ?? throw new InvalidOperationException("Missing S3 bucket configuration.");
     }
@@ -33,12 +31,13 @@ public class S3StorageService : IStorageService
             InputStream = stream,
             BucketName = bucketName,
             Key = fileName,
-            ContentType = contentType
+            ContentType = contentType,
+            TagSet =
+            [
+                new () { Key = USER_ID_TAG, Value = userId }
+            ]
         };
 
-        uploadRequest.TagSet.Add(new Tag { Key = USER_ID_TAG, Value = userId });
-
-        var transferUtility = new TransferUtility(s3Client);
         await transferUtility.UploadAsync(uploadRequest, cancellationToken);
     }
 }

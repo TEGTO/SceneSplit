@@ -2,6 +2,11 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
+		<RestorePackages>true</RestorePackages>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<AWSProjectType>Lambda</AWSProjectType>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<PublishReadyToRun>true</PublishReadyToRun>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -19,5 +24,4 @@
 	<ItemGroup>
 		<Protobuf Include="..\SceneSplit.ImageCompression.Sdk\Protos\compression.proto" Link="Protos\compression.proto" GrpcServices="Server" />
 	</ItemGroup>
-
 </Project>

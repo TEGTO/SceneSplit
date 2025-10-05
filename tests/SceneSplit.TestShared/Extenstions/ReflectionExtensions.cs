@@ -2,6 +2,7 @@
 
 namespace SceneSplit.TestShared.Extenstions;
 
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "<Pending>")]
 public static class ReflectionExtensions
 {
     public static T? GetFieldValue<T>(this object obj, string name)

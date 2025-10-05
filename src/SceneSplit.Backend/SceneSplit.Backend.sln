@@ -39,6 +39,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.ImageCompression
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.ImageCompression.Sdk", "SceneSplit.ImageCompression.Sdk\SceneSplit.ImageCompression.Sdk.csproj", "{8398C54C-A61E-DB30-2891-52F533697FB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.ImageCompression.Api.UnitTests", "..\..\tests\SceneSplit.ImageCompression.Api.UnitTests\SceneSplit.ImageCompression.Api.UnitTests.csproj", "{113C1324-6691-4689-8D1A-947F5AFC41AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Lambdas.Package", "..\..\infra\SceneSplit.Lambdas.Package\SceneSplit.Lambdas.Package.csproj", "{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +77,14 @@ Global
 		{8398C54C-A61E-DB30-2891-52F533697FB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8398C54C-A61E-DB30-2891-52F533697FB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8398C54C-A61E-DB30-2891-52F533697FB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{113C1324-6691-4689-8D1A-947F5AFC41AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{113C1324-6691-4689-8D1A-947F5AFC41AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{113C1324-6691-4689-8D1A-947F5AFC41AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{113C1324-6691-4689-8D1A-947F5AFC41AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +99,8 @@ Global
 		{F1459744-52F8-4C48-9C54-A26AF724FF04} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{24EC6427-7084-8502-45BD-C2F0E5158FCF} = {F9804709-4F1A-4666-A5F8-FE762AFAFA81}
 		{8398C54C-A61E-DB30-2891-52F533697FB9} = {F9804709-4F1A-4666-A5F8-FE762AFAFA81}
+		{113C1324-6691-4689-8D1A-947F5AFC41AE} = {FCA762AF-9535-4BFF-B0F2-A0A1F5A3C76F}
+		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E} = {43DEF0D9-7BB2-4B14-901D-8420EB987CDB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EEF3F48B-173E-4436-9539-B95BA6E6C5EA}
