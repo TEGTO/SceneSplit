@@ -1,10 +1,10 @@
-using SceneSplit.ImageCompression.Api.Services;
+﻿using SceneSplit.ImageCompression.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc();
 
-builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.ApplicationLoadBalancer);
 
 var app = builder.Build();
 
