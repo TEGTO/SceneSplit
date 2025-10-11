@@ -121,11 +121,14 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          dotnet test tests/*/*.UnitTests.csproj \
-            --configuration Release \
-            --logger "junit;LogFilePath=./TestResults/unit-tests.xml" \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./TestResults
+          for proj in $(ls tests/*/*.UnitTests.csproj); do
+            echo "▶ Running unit tests for $proj"
+            dotnet test "$proj" \
+              --configuration Release \
+              --logger "junit;LogFilePath=./TestResults/$(basename $proj)-results.xml" \
+              --collect:"XPlat Code Coverage" \
+              --results-directory ./TestResults
+          done
 
       - name: Run integration tests
         run: |
