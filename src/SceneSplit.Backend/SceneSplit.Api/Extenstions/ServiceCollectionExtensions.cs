@@ -16,15 +16,15 @@ public static class ServiceCollectionExtensions
                 if (allowedOrigins.Contains("*"))
                 {
                     policy.AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 }
                 else
                 {
                     policy.WithOrigins(allowedOrigins)
-                          .AllowAnyHeader()
-                          .AllowCredentials()
-                          .AllowAnyMethod();
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .AllowAnyMethod();
                 }
 
                 if (isDevelopment)

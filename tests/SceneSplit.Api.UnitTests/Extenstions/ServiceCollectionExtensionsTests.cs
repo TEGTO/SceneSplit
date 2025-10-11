@@ -6,7 +6,7 @@ using Moq;
 using SceneSplit.Api.Extenstions;
 using SceneSplit.Configuration;
 
-namespace SceneSplit.Extenstions.Tests;
+namespace SceneSplit.Api.UnitTests.Extenstions;
 
 [TestFixture]
 internal class ServiceCollectionExtensionsTests

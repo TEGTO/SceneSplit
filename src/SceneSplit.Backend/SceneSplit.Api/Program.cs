@@ -1,8 +1,11 @@
+﻿using Amazon.S3;
+using Amazon.S3.Transfer;
 using SceneSplit.Api.Extenstions;
 using SceneSplit.Api.Hubs;
-using SceneSplit.Api.Sevices.ImagePersistent;
-using SceneSplit.Api.Sevices.SceneImageProcessor;
+using SceneSplit.Api.Services.StorageService;
 using SceneSplit.Configuration;
+using SceneSplit.GrpcClientShared.Extenstions;
+using SceneSplit.ImageCompression.Sdk;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,12 +22,24 @@ builder.Services.AddSignalR(o =>
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddApplicationCors(builder.Configuration, myAllowSpecificOrigins, builder.Environment.IsDevelopment());
 
-builder.Services.AddSingleton<IImagePersistentService, ImagePersistentService>();
-builder.Services.AddSingleton<ISceneImageProcessor, SceneImageProcessor>();
+var compressionApiUrl = builder.Configuration[ApiConfigurationKeys.COMPRESSION_API_URL]
+    ?? throw new InvalidOperationException($"{ApiConfigurationKeys.COMPRESSION_API_URL} is missing or null.");
+
+builder.Services.AddGrpcClientWeb<Compression.CompressionClient>(compressionApiUrl);
+
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddHealthChecks();
+
+builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddSingleton<ITransferUtility>(sp =>
+{
+    var s3 = sp.GetRequiredService<IAmazonS3>();
+    return new TransferUtility(s3);
+});
+builder.Services.AddSingleton<IStorageService, S3StorageService>();
 
 var app = builder.Build();
 

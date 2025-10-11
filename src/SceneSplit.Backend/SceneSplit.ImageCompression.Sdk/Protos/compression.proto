@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "SceneSplit.ImageCompression.Sdk";
+
+package compression;
+
+service Compression {
+  rpc CompressImage (CompressionRequest) returns (CompressionReply);
+}
+
+message CompressionRequest {
+  string file_name = 1;  
+  bytes image_data = 2; 
+  int32 quality = 3;    
+}
+
+message CompressionReply {
+  bytes compressed_image = 1;
+  string format = 2;          
+  int32 original_size = 3;  
+  int32 compressed_size = 4; 
+}

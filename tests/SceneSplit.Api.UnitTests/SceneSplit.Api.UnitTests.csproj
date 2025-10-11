@@ -5,8 +5,4 @@
     <ProjectReference Include="..\SceneSplit.TestShared\SceneSplit.TestShared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Using Include="NUnit.Framework" />
-  </ItemGroup>
-
 </Project>

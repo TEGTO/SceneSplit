@@ -4,6 +4,7 @@ using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Constructs;
 using SceneSplit.Cdk.Helpers;
+using HealthCheck = Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck;
 
 namespace SceneSplit.Cdk.Constructs;
 
@@ -11,7 +12,7 @@ public class FrontendServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService Service { get; }
 
-    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, string apiEndpoint, ISecurityGroup apiSecGroup, Vpc vpc)
+    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string apiEndpoint, ISecurityGroup apiSecGroup)
         : base(scope, id)
     {
         var frontendSecGroup = new SecurityGroup(this, "FrontendServiceSecurityGroup", new SecurityGroupProps
@@ -24,6 +25,7 @@ public class FrontendServiceConstruct : Construct
 
         Service = new ApplicationLoadBalancedFargateService(this, "FrontendService", new ApplicationLoadBalancedFargateServiceProps
         {
+            ServiceName = "scene-split-frontend",
             Cluster = cluster,
             DesiredCount = 1,
             TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
@@ -46,9 +48,8 @@ public class FrontendServiceConstruct : Construct
                     StreamPrefix = "frontendServiceLogs"
                 }),
             },
-            MemoryLimitMiB = 1024,
-            Cpu = 512,
-            ServiceName = "frontend",
+            MemoryLimitMiB = 512,
+            Cpu = 256,
             PublicLoadBalancer = true,
             TaskSubnets = new SubnetSelection { SubnetType = SubnetType.PRIVATE_WITH_EGRESS },
             SecurityGroups = [frontendSecGroup],
@@ -57,7 +58,7 @@ public class FrontendServiceConstruct : Construct
             MaxHealthyPercent = 200
         });
 
-        Service.TargetGroup.ConfigureHealthCheck(new Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck
+        Service.TargetGroup.ConfigureHealthCheck(new HealthCheck
         {
             Path = "/health",
             Interval = Duration.Seconds(30),

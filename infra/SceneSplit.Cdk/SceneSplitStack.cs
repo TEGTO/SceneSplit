@@ -1,6 +1,7 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
+using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.ServiceDiscovery;
 using Constructs;
 using SceneSplit.Cdk.Constructs;
@@ -27,10 +28,33 @@ public class SceneSplitStack : Stack
             },
         });
 
-        var apiService = new ApiServiceConstruct(this, "ApiServiceConstruct", cluster, vpc);
+        var sceneImageBucket = new Bucket(this, "SceneImageBucket", new BucketProps
+        {
+            BucketName = "scene-split-scene-images",
+            RemovalPolicy = RemovalPolicy.DESTROY,
+            AutoDeleteObjects = true,
+            BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
+            Versioned = false,
+            Encryption = BucketEncryption.S3_MANAGED
+        });
 
-        var apiEndpoint = $"http://{apiService.Service.LoadBalancer.LoadBalancerDnsName}";
-        _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, apiEndpoint,
-            apiService.Service.Service.Connections.SecurityGroups[0], vpc);
+        var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
+
+        var compressionApiUrl = $"https://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
+        var apiService = new ApiServiceConstruct(
+            this,
+            "ApiServiceConstruct",
+            cluster,
+            vpc,
+            compressionApiUrl,
+            compressionApiService.FargateService.Service.Connections.SecurityGroups[0],
+            sceneImageBucket.BucketName
+        );
+
+        sceneImageBucket.GrantReadWrite(apiService.FargateService.TaskDefinition.TaskRole);
+
+        var apiEndpoint = $"http://{apiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
+        _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, vpc, apiEndpoint,
+            apiService.FargateService.Service.Connections.SecurityGroups[0]);
     }
 }
