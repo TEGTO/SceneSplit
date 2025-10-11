@@ -30,11 +30,12 @@ public class SceneSplitStack : Stack
 
         var sceneImageBucket = new Bucket(this, "SceneImageBucket", new BucketProps
         {
-            BucketName = $"scene-split-scene-images",
+            BucketName = "scene-split-scene-images",
             RemovalPolicy = RemovalPolicy.DESTROY,
             AutoDeleteObjects = true,
             BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
-            Versioned = false
+            Versioned = false,
+            Encryption = BucketEncryption.S3_MANAGED
         });
 
         var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
