@@ -21,6 +21,7 @@ public class ApiServiceConstruct : Construct
             Vpc = vpc
         });
 
+        compressionApiSecGroup.AddIngressRule(apiSecGroup, Port.Tcp(443), "Allow api to access compression api");
         compressionApiSecGroup.AddIngressRule(apiSecGroup, Port.Tcp(80), "Allow api to access compression api");
 
         Service = new ApplicationLoadBalancedFargateService(this, "ApiService", new ApplicationLoadBalancedFargateServiceProps

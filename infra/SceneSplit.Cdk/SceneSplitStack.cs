@@ -37,9 +37,9 @@ public class SceneSplitStack : Stack
             Versioned = false
         });
 
-        var compressionApi = new CompressionApiConstruct(this, "CompressionApiConstruct", vpc, cluster.DefaultCloudMapNamespace!);
+        var compressionApi = new CompressionApiConstruct(this, "CompressionApiConstruct", vpc);
 
-        var compressionApiUrl = $"http://{compressionApi.Service.LoadBalancerDnsName}";
+        var compressionApiUrl = $"https://{compressionApi.Service.LoadBalancerDnsName}";
         var apiService = new ApiServiceConstruct(
             this,
             "ApiServiceConstruct",

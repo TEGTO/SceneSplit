@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Transfer;
 using Grpc.Net.Client.Web;
+using Microsoft.Extensions.Http.Resilience;
 using SceneSplit.Api.Extenstions;
 using SceneSplit.Api.Hubs;
 using SceneSplit.Api.Interceptors;
@@ -33,8 +34,35 @@ builder.Services.AddGrpcClient<Compression.CompressionClient>(o =>
 })
 .AddInterceptor<GrpcErrorInterceptor>()
 .AddInterceptor<GrpcResilienceInterceptor>()
-.AddResilienceHandler()
-.ConfigurePrimaryHttpMessageHandler(() => new GrpcWebHandler(GrpcWebMode.GrpcWeb, new HttpClientHandler()));
+.AddResilienceHandler(options =>
+{
+    options.TotalRequestTimeout = new HttpTimeoutStrategyOptions
+    {
+        Timeout = TimeSpan.FromSeconds(180)
+    };
+
+    options.AttemptTimeout = new HttpTimeoutStrategyOptions
+    {
+        Timeout = TimeSpan.FromSeconds(60)
+    };
+
+    options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
+    {
+        SamplingDuration = TimeSpan.FromSeconds(180),
+        MinimumThroughput = 10,
+        FailureRatio = 0.5,
+        BreakDuration = TimeSpan.FromSeconds(30)
+    };
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
+{
+    var handler = new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+    };
+
+    return new GrpcWebHandler(GrpcWebMode.GrpcWeb, handler);
+});
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 

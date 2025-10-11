@@ -1,15 +1,22 @@
-﻿{
+{
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
     "SceneSplit.ImageCompression.Api": {
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "https://localhost:5163",
+      "applicationUrl": "http://localhost:5163",
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        "Logging__LogLevel__Default": "Debug"
+        "Logging__LogLevel__Default": "Debug",
+        "Kestrel__EndpointDefaults__Protocols": "Http1AndHttp2"
       }
+    },
+    "Mock Lambda Test Tool": {
+      "commandName": "Executable",
+      "commandLineArgs": "--port 5050",
+      "workingDirectory": ".\\bin\\$(Configuration)\\net8.0",
+      "executablePath": "%USERPROFILE%\\.dotnet\\tools\\dotnet-lambda-test-tool-8.0.exe"
     }
   }
 }
