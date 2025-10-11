@@ -37,23 +37,23 @@ public class SceneSplitStack : Stack
             Versioned = false
         });
 
-        var compressionApi = new CompressionApiConstruct(this, "CompressionApiConstruct", vpc);
+        var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
 
-        var compressionApiUrl = $"https://{compressionApi.Service.LoadBalancerDnsName}";
+        var compressionApiUrl = $"https://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
         var apiService = new ApiServiceConstruct(
             this,
             "ApiServiceConstruct",
             cluster,
             vpc,
             compressionApiUrl,
-            compressionApi.Service.Connections.SecurityGroups[0],
+            compressionApiService.FargateService.Service.Connections.SecurityGroups[0],
             sceneImageBucket.BucketName
         );
 
-        sceneImageBucket.GrantReadWrite(apiService.Service.TaskDefinition.TaskRole);
+        sceneImageBucket.GrantReadWrite(apiService.FargateService.TaskDefinition.TaskRole);
 
-        var apiEndpoint = $"http://{apiService.Service.LoadBalancer.LoadBalancerDnsName}";
+        var apiEndpoint = $"http://{apiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
         _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, vpc, apiEndpoint,
-            apiService.Service.Service.Connections.SecurityGroups[0]);
+            apiService.FargateService.Service.Connections.SecurityGroups[0]);
     }
 }

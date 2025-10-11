@@ -4,8 +4,6 @@
 	<PackageReference Include="AWSSDK.Extensions.NETCore.Setup" />
 	<PackageReference Include="AWSSDK.S3" />
 	<PackageReference Include="Grpc.AspNetCore" />
-    <PackageReference Include="Grpc.Net.Client.Web" />
-    <PackageReference Include="Grpc.Net.ClientFactory" />
     <PackageReference Include="Mapster" />
     <PackageReference Include="MediatR" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
@@ -17,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
+    <ProjectReference Include="..\SceneSplit.GrpcClientShared\SceneSplit.GrpcClientShared.csproj" />
     <ProjectReference Include="..\SceneSplit.ImageCompression.Sdk\SceneSplit.ImageCompression.Sdk.csproj" />
   </ItemGroup>
 

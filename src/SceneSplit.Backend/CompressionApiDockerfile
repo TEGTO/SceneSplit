@@ -12,20 +12,19 @@ WORKDIR /src
 COPY Directory.Build.props .
 COPY Directory.Packages.props .
 
-COPY src/SceneSplit.Backend/SceneSplit.Api ./SceneSplit.Api
+COPY src/SceneSplit.Backend/SceneSplit.ImageCompression.Api ./SceneSplit.ImageCompression.Api
 COPY src/SceneSplit.Backend/SceneSplit.Configuration ./SceneSplit.Configuration
 COPY src/SceneSplit.Backend/SceneSplit.ImageCompression.Sdk ./SceneSplit.ImageCompression.Sdk
-COPY src/SceneSplit.Backend/SceneSplit.GrpcClientShared ./SceneSplit.GrpcClientShared
 
-WORKDIR /src/SceneSplit.Api
-RUN dotnet restore "SceneSplit.Api.csproj"
-RUN dotnet build "SceneSplit.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR /src/SceneSplit.ImageCompression.Api
+RUN dotnet restore "SceneSplit.ImageCompression.Api.csproj"
+RUN dotnet build "SceneSplit.ImageCompression.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "SceneSplit.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "SceneSplit.ImageCompression.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SceneSplit.Api.dll"]
+ENTRYPOINT ["dotnet", "SceneSplit.ImageCompression.Api.dll"]

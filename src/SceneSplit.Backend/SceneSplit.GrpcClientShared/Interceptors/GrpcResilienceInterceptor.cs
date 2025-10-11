@@ -1,9 +1,10 @@
 ﻿using Grpc.Core;
 using Grpc.Core.Interceptors;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
 
-namespace SceneSplit.Api.Interceptors;
+namespace SceneSplit.GrpcClientShared.Interceptors;
 
 public class GrpcResilienceInterceptor(ILogger<GrpcResilienceInterceptor> logger) : Interceptor
 {

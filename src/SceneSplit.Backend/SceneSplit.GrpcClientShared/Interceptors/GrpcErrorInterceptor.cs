@@ -1,8 +1,9 @@
 ﻿using Grpc.Core;
 using Grpc.Core.Interceptors;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
-namespace SceneSplit.Api.Interceptors;
+namespace SceneSplit.GrpcClientShared.Interceptors;
 
 public class GrpcErrorInterceptor(ILogger<GrpcErrorInterceptor> logger) : Interceptor
 {

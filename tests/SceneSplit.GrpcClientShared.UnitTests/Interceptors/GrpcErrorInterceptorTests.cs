@@ -3,9 +3,10 @@ using Grpc.Core.Interceptors;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SceneSplit.GrpcClientShared.Interceptors;
 using static Grpc.Core.Interceptors.Interceptor;
 
-namespace SceneSplit.Api.Interceptors.Tests;
+namespace SceneSplit.GrpcClientShared.UnitTests.Interceptors;
 
 [TestFixture]
 public class GrpcErrorInterceptorTests

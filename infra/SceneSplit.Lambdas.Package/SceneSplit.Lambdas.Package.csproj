@@ -8,10 +8,10 @@
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 
-		<Exec
-		  Command='dotnet lambda package --configuration $(Configuration) --framework $(Framework) --verbose --output-package "$(PublishDir)\SceneSplit.ImageCompression.Api.zip"'
+		<!--<Exec
+		  Command='dotnet lambda package /-/-configuration $(Configuration) /-/-framework $(Framework) /-/-verbose /-/-output-package "$(PublishDir)\SceneSplit.ImageCompression.Api.zip"'
 		  WorkingDirectory='..\..\src\SceneSplit.Backend\SceneSplit.ImageCompression.Api'
-		  ConsoleToMSBuild='true' />
+		  ConsoleToMSBuild='true' />-->
 
 	</Target>
 

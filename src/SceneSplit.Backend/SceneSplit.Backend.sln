@@ -33,6 +33,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dockerfiles", "Dockerfiles", "{F1459744-52F8-4C48-9C54-A26AF724FF04}"
 	ProjectSection(SolutionItems) = preProject
 		ApiDockerfile = ApiDockerfile
+		CompressionApiDockerfile = CompressionApiDockerfile
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.ImageCompression.Api", "SceneSplit.ImageCompression.Api\SceneSplit.ImageCompression.Api.csproj", "{24EC6427-7084-8502-45BD-C2F0E5158FCF}"
@@ -42,6 +43,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.ImageCompression.Api.UnitTests", "..\..\tests\SceneSplit.ImageCompression.Api.UnitTests\SceneSplit.ImageCompression.Api.UnitTests.csproj", "{113C1324-6691-4689-8D1A-947F5AFC41AE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Lambdas.Package", "..\..\infra\SceneSplit.Lambdas.Package\SceneSplit.Lambdas.Package.csproj", "{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.GrpcClientShared", "SceneSplit.GrpcClientShared\SceneSplit.GrpcClientShared.csproj", "{712727C6-373A-6678-3B25-20C8AFC9DEAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.GrpcClientShared.UnitTests", "..\..\tests\SceneSplit.GrpcClientShared.UnitTests\SceneSplit.GrpcClientShared.UnitTests.csproj", "{A2C611D5-626F-F400-79E9-9DEA32C430F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +90,14 @@ Global
 		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{712727C6-373A-6678-3B25-20C8AFC9DEAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{712727C6-373A-6678-3B25-20C8AFC9DEAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{712727C6-373A-6678-3B25-20C8AFC9DEAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{712727C6-373A-6678-3B25-20C8AFC9DEAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2C611D5-626F-F400-79E9-9DEA32C430F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2C611D5-626F-F400-79E9-9DEA32C430F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2C611D5-626F-F400-79E9-9DEA32C430F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2C611D5-626F-F400-79E9-9DEA32C430F9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,6 +114,8 @@ Global
 		{8398C54C-A61E-DB30-2891-52F533697FB9} = {F9804709-4F1A-4666-A5F8-FE762AFAFA81}
 		{113C1324-6691-4689-8D1A-947F5AFC41AE} = {FCA762AF-9535-4BFF-B0F2-A0A1F5A3C76F}
 		{BD7B98A9-A5B8-F409-C19A-AD3581EF311E} = {43DEF0D9-7BB2-4B14-901D-8420EB987CDB}
+		{712727C6-373A-6678-3B25-20C8AFC9DEAC} = {F9804709-4F1A-4666-A5F8-FE762AFAFA81}
+		{A2C611D5-626F-F400-79E9-9DEA32C430F9} = {FCA762AF-9535-4BFF-B0F2-A0A1F5A3C76F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EEF3F48B-173E-4436-9539-B95BA6E6C5EA}

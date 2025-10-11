@@ -1,7 +1,10 @@
 ﻿using Amazon.CDK;
+using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
+using Amazon.CDK.AWS.ElasticLoadBalancingV2;
+using Amazon.CDK.AWS.SSM;
 using Constructs;
 using SceneSplit.Cdk.Helpers;
 using SceneSplit.Configuration;
@@ -9,57 +12,58 @@ using HealthCheck = Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck;
 
 namespace SceneSplit.Cdk.Constructs;
 
-public class ApiServiceConstruct : Construct
+public class CompressionApiServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService FargateService { get; }
 
-    public ApiServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string compressionApiUrl, ISecurityGroup compressionApiSecGroup, string sceneImageBucket)
+    public CompressionApiServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc)
         : base(scope, id)
     {
-        var apiSecGroup = new SecurityGroup(this, "ApiServiceSecurityGroup", new SecurityGroupProps
+        var secGroup = new SecurityGroup(this, "CompressionApiServiceSecurityGroup", new SecurityGroupProps
         {
             AllowAllOutbound = true,
             Vpc = vpc
         });
 
-        compressionApiSecGroup.AddIngressRule(apiSecGroup, Port.Tcp(443), "Allow api to access compression api");
+        var certificateArn = StringParameter.ValueForStringParameter(this, "/scene-split/cert-arn");
+        var certificate = Certificate.FromCertificateArn(this, "CompressionApiCertificate", certificateArn);
 
-        FargateService = new ApplicationLoadBalancedFargateService(this, "ApiService", new ApplicationLoadBalancedFargateServiceProps
+        FargateService = new ApplicationLoadBalancedFargateService(this, "CompressionApiService", new ApplicationLoadBalancedFargateServiceProps
         {
-            ServiceName = "scene-split-api",
+            ServiceName = "scene-split-compression-api",
             Cluster = cluster,
             DesiredCount = 1,
+            MemoryLimitMiB = 512,
+            Cpu = 256,
+            PublicLoadBalancer = false,
+            SecurityGroups = [secGroup],
+            ListenerPort = 443,
+            Certificate = certificate,
+            Protocol = ApplicationProtocol.HTTPS,
             TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
             {
                 Image = ContainerImage.FromAsset(".", new AssetImageProps
                 {
-                    File = "src/SceneSplit.Backend/ApiDockerfile"
+                    File = "src/SceneSplit.Backend/CompressionApiDockerfile"
                 }),
                 ContainerPort = 8080,
                 Environment = new Dictionary<string, string>
                 {
                     { "ASPNETCORE_ENVIRONMENT", "Production" },
-                    { ApiConfigurationKeys.ALLOWED_CORS_ORIGINS, "*" },
-                    { ApiConfigurationKeys.MAX_IMAGE_SIZE, (10 * 1024 * 1024).ToString() },
-                    { ApiConfigurationKeys.ALLOWED_IMAGE_TYPES, ".jpg,.jpeg,.png" },
-                    { ApiConfigurationKeys.COMPRESSION_API_URL, compressionApiUrl },
-                    { ApiConfigurationKeys.SCENE_IMAGE_BUCKET, sceneImageBucket },
+                    { "Kestrel__EndpointDefaults__Protocols", "Http1" },
+                    { ImageCompressionApiConfigurationKeys.ALLOWED_IMAGE_TYPES, ".jpg,.jpeg,.png" },
+                    { ImageCompressionApiConfigurationKeys.MAX_IMAGE_SIZE, (10 * 1024 * 1024).ToString() }
                 },
                 LogDriver = LogDriver.AwsLogs(new AwsLogDriverProps
                 {
-                    StreamPrefix = "apiServiceLogs"
+                    StreamPrefix = "compressionApiLogs"
                 }),
             },
-            SecurityGroups = [apiSecGroup],
-            MemoryLimitMiB = 512,
-            Cpu = 256,
-            PublicLoadBalancer = false,
             HealthCheck = TaskHelpers.AddHealthCheckForTask("8080/health"),
             MinHealthyPercent = 100,
             MaxHealthyPercent = 200
         });
 
-        FargateService.TargetGroup.EnableCookieStickiness(Duration.Minutes(30));
         FargateService.TargetGroup.ConfigureHealthCheck(new HealthCheck
         {
             Path = "/health",

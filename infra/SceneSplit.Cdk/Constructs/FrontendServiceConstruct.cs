@@ -4,6 +4,7 @@ using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Constructs;
 using SceneSplit.Cdk.Helpers;
+using HealthCheck = Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck;
 
 namespace SceneSplit.Cdk.Constructs;
 
@@ -57,7 +58,7 @@ public class FrontendServiceConstruct : Construct
             MaxHealthyPercent = 200
         });
 
-        Service.TargetGroup.ConfigureHealthCheck(new Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck
+        Service.TargetGroup.ConfigureHealthCheck(new HealthCheck
         {
             Path = "/health",
             Interval = Duration.Seconds(30),

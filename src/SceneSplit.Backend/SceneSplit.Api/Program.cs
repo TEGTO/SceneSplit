@@ -1,12 +1,10 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Transfer;
-using Grpc.Net.Client.Web;
-using Microsoft.Extensions.Http.Resilience;
 using SceneSplit.Api.Extenstions;
 using SceneSplit.Api.Hubs;
-using SceneSplit.Api.Interceptors;
 using SceneSplit.Api.Services.StorageService;
 using SceneSplit.Configuration;
+using SceneSplit.GrpcClientShared.Extenstions;
 using SceneSplit.ImageCompression.Sdk;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,45 +22,10 @@ builder.Services.AddSignalR(o =>
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddApplicationCors(builder.Configuration, myAllowSpecificOrigins, builder.Environment.IsDevelopment());
 
-builder.Services.AddTransient<GrpcErrorInterceptor>();
-builder.Services.AddTransient<GrpcResilienceInterceptor>();
+var compressionApiUrl = builder.Configuration[ApiConfigurationKeys.COMPRESSION_API_URL]
+    ?? throw new InvalidOperationException($"{ApiConfigurationKeys.COMPRESSION_API_URL} is missing or null.");
 
-builder.Services.AddGrpcClient<Compression.CompressionClient>(o =>
-{
-    o.Address = new Uri(builder.Configuration[ApiConfigurationKeys.COMPRESSION_API_URL]
-        ?? throw new InvalidOperationException($"{ApiConfigurationKeys.COMPRESSION_API_URL} is missing or null."));
-})
-.AddInterceptor<GrpcErrorInterceptor>()
-.AddInterceptor<GrpcResilienceInterceptor>()
-.AddResilienceHandler(options =>
-{
-    options.TotalRequestTimeout = new HttpTimeoutStrategyOptions
-    {
-        Timeout = TimeSpan.FromSeconds(180)
-    };
-
-    options.AttemptTimeout = new HttpTimeoutStrategyOptions
-    {
-        Timeout = TimeSpan.FromSeconds(60)
-    };
-
-    options.CircuitBreaker = new HttpCircuitBreakerStrategyOptions
-    {
-        SamplingDuration = TimeSpan.FromSeconds(180),
-        MinimumThroughput = 10,
-        FailureRatio = 0.5,
-        BreakDuration = TimeSpan.FromSeconds(30)
-    };
-})
-.ConfigurePrimaryHttpMessageHandler(() =>
-{
-    var handler = new HttpClientHandler
-    {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-    };
-
-    return new GrpcWebHandler(GrpcWebMode.GrpcWeb, handler);
-});
+builder.Services.AddGrpcClientWeb<Compression.CompressionClient>(compressionApiUrl);
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 

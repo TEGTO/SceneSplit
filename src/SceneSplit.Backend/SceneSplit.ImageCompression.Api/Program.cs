@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc();
 
-builder.Services.AddAWSLambdaHosting(LambdaEventSource.ApplicationLoadBalancer);
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -14,5 +14,7 @@ app.MapGrpcService<CompressionService>().EnableGrpcWeb();
 app.MapGet("/", () => "All gRPC service are supported by default in " +
     "this example, and are callable from browser apps using the " +
     "gRPC-Web protocol");
+
+app.MapHealthChecks("/health");
 
 await app.RunAsync();
