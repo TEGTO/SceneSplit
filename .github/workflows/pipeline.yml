@@ -127,6 +127,7 @@ jobs:
               --configuration Release \
               --logger "junit;LogFilePath=./TestResults/$(basename $proj)-results.xml" \
               --collect:"XPlat Code Coverage" \
+              --settings coverage.runsettings \
               --results-directory ./TestResults
           done
 
