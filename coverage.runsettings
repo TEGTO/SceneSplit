@@ -23,7 +23,7 @@
 		<ModulePath>.*Serilog.*</ModulePath>
 		<ModulePath>.*StackExchange.*</ModulePath>
 		<ModulePath>.*\\coverlet.collector.*</ModulePath>
-		<ModulePath>.*SceneSplit\.TestShared.*</ModulePath>
+		<ModulePath>.*TestShared</ModulePath>
               </Exclude>
             </ModulePaths>
 
@@ -44,6 +44,7 @@
               <Exclude>
                  <Source>.*DbContext.cs</Source>
 		 <Source>.*Configuration.cs</Source>
+                 <Source>Program.cs</Source>
               </Exclude>
             </Sources>
           </CodeCoverage>
