@@ -17,7 +17,6 @@ public class CompressionServiceTests
 {
     private CompressionService service;
     private Mock<IConfiguration> configMock;
-
     private Mock<ServerCallContext> contextMock;
 
     [SetUp]
@@ -84,12 +83,11 @@ public class CompressionServiceTests
         // Act
         var result = await service.CompressImage(request, contextMock.Object);
 
-        using (Assert.EnterMultipleScope())
+        Assert.Multiple(() =>
         {
-            // Assert
             Assert.That(result.Format, Is.EqualTo("png"));
             Assert.That(result.CompressedSize, Is.GreaterThan(0));
-        }
+        });
     }
 
     [Test]
@@ -104,8 +102,9 @@ public class CompressionServiceTests
         };
 
         // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(async () =>
-            await service.CompressImage(request, contextMock.Object));
+        var ex = Assert.ThrowsAsync<RpcException>(() =>
+            service.CompressImage(request, contextMock.Object));
+
         using (Assert.EnterMultipleScope())
         {
             Assert.That(ex.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
@@ -125,8 +124,9 @@ public class CompressionServiceTests
         };
 
         // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(async () =>
-            await service.CompressImage(request, contextMock.Object));
+        var ex = Assert.ThrowsAsync<RpcException>(() =>
+            service.CompressImage(request, contextMock.Object));
+
         using (Assert.EnterMultipleScope())
         {
             Assert.That(ex.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
@@ -145,12 +145,107 @@ public class CompressionServiceTests
         };
 
         // Act & Assert
-        var ex = Assert.ThrowsAsync<RpcException>(async () =>
-            await service.CompressImage(request, contextMock.Object));
+        var ex = Assert.ThrowsAsync<RpcException>(() =>
+            service.CompressImage(request, contextMock.Object));
+
         using (Assert.EnterMultipleScope())
         {
             Assert.That(ex.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
             Assert.That(ex.Status.Detail, Does.Contain("cannot be empty"));
+        }
+    }
+
+    [Test]
+    public async Task CompressImage_ResizeToExactDimensions_ResizesCorrectly()
+    {
+        // Arrange
+        var imageData = CreateTestImage(400, 200);
+        var request = new CompressionRequest
+        {
+            FileName = "resize.jpg",
+            ImageData = ByteString.CopyFrom(imageData),
+            ResizeWidth = 100,
+            ResizeHeight = 100
+        };
+
+        // Act
+        var result = await service.CompressImage(request, contextMock.Object);
+
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.NewWidth, Is.EqualTo(100));
+            Assert.That(result.NewHeight, Is.EqualTo(100));
+        }
+    }
+
+    [Test]
+    public async Task CompressImage_ResizeWithKeepAspectRatioWidthOnly_ResizesProportionally()
+    {
+        // Arrange
+        var imageData = CreateTestImage(400, 200);
+        var request = new CompressionRequest
+        {
+            FileName = "resize_aspect.jpg",
+            ImageData = ByteString.CopyFrom(imageData),
+            ResizeWidth = 200,
+            KeepAspectRatio = true
+        };
+
+        // Act
+        var result = await service.CompressImage(request, contextMock.Object);
+
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.NewWidth, Is.EqualTo(200));
+            Assert.That(result.NewHeight, Is.EqualTo(100));
+        }
+    }
+
+    [Test]
+    public async Task CompressImage_ResizeWithKeepAspectRatioHeightOnly_ResizesProportionally()
+    {
+        // Arrange
+        var imageData = CreateTestImage(300, 150);
+        var request = new CompressionRequest
+        {
+            FileName = "resize_height.jpg",
+            ImageData = ByteString.CopyFrom(imageData),
+            ResizeHeight = 75,
+            KeepAspectRatio = true
+        };
+
+        // Act
+        var result = await service.CompressImage(request, contextMock.Object);
+
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.NewHeight, Is.EqualTo(75));
+            Assert.That(result.NewWidth, Is.EqualTo(150));
+        }
+    }
+
+    [Test]
+    public async Task CompressImage_NoResizeParams_KeepsOriginalDimensions()
+    {
+        // Arrange  
+        var imageData = CreateTestImage(120, 80);
+        var request = new CompressionRequest
+        {
+            FileName = "noresize.jpg",
+            ImageData = ByteString.CopyFrom(imageData)
+        };
+
+        // Act
+        var result = await service.CompressImage(request, contextMock.Object);
+
+        // Assert
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.NewWidth, Is.EqualTo(120));
+            Assert.That(result.NewHeight, Is.EqualTo(80));
         }
     }
 }

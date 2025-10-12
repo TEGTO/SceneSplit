@@ -12,6 +12,10 @@ message CompressionRequest {
   string file_name = 1;  
   bytes image_data = 2; 
   int32 quality = 3;    
+
+  int32 resize_width = 4;   
+  int32 resize_height = 5;   
+  bool keep_aspect_ratio = 6;
 }
 
 message CompressionReply {
@@ -19,4 +23,6 @@ message CompressionReply {
   string format = 2;          
   int32 original_size = 3;  
   int32 compressed_size = 4; 
+  int32 new_width = 5;       
+  int32 new_height = 6;
 }

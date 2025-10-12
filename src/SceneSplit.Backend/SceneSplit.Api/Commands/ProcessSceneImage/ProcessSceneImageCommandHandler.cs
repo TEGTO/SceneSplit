@@ -12,6 +12,9 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
     private readonly IStorageService storageService;
     private readonly string[] allowedImageTypes;
     private readonly int maxFileSizeInBytes;
+    private readonly int imageQuality;
+    private readonly int resizeWidth;
+    private readonly int resizeHeight;
 
     public ProcessSceneImageCommandHandler(
         Compression.CompressionClient compressionClient,
@@ -22,10 +25,16 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
         this.storageService = storageService;
 
         var allowedImageTypesConfig = configuration[ApiConfigurationKeys.ALLOWED_IMAGE_TYPES] ?? ".jpg,.jpeg,.png";
-        var maxFileSizeInBytesConfig = configuration[ApiConfigurationKeys.MAX_IMAGE_SIZE] ?? (ToBytes(10)).ToString();
+        var maxFileSizeInBytesConfig = configuration[ApiConfigurationKeys.MAX_IMAGE_SIZE] ?? ToBytes(10).ToString();
+        var qualityConfig = configuration[ApiConfigurationKeys.IMAGE_QUALITY_COMPRESSION] ?? "75";
+        var resizeWidthConfig = configuration[ApiConfigurationKeys.RESIZE_WIDTH] ?? "1024";
+        var resizeHeightConfig = configuration[ApiConfigurationKeys.RESIZE_HEIGHT] ?? "1024";
 
         allowedImageTypes = allowedImageTypesConfig.Split(",");
         maxFileSizeInBytes = int.Parse(maxFileSizeInBytesConfig);
+        imageQuality = int.Parse(qualityConfig);
+        resizeWidth = int.Parse(resizeWidthConfig);
+        resizeHeight = int.Parse(resizeHeightConfig);
     }
 
     public async Task Handle(ProcessSceneImageCommand request, CancellationToken cancellationToken)
@@ -45,7 +54,10 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
         {
             FileName = request.FileName,
             ImageData = Google.Protobuf.ByteString.CopyFrom(request.FileContent),
-            Quality = 75
+            Quality = imageQuality,
+            ResizeWidth = resizeWidth,
+            ResizeHeight = resizeHeight,
+            KeepAspectRatio = true
         };
 
         var response = await compressionClient.CompressImageAsync(compressionRequest, cancellationToken: cancellationToken);

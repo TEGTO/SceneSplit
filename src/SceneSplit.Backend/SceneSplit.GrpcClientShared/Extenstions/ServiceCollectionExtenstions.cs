@@ -2,8 +2,19 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using SceneSplit.GrpcClientShared.Interceptors;
+using System.Net;
 
 namespace SceneSplit.GrpcClientShared.Extenstions;
+
+internal sealed class Http11EnforcerHandler : DelegatingHandler
+{
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        request.Version = HttpVersion.Version11;
+        request.VersionPolicy = HttpVersionPolicy.RequestVersionExact;
+        return base.SendAsync(request, cancellationToken);
+    }
+}
 
 public static class ServiceCollectionExtensions
 {
@@ -18,19 +29,18 @@ public static class ServiceCollectionExtensions
         {
             o.Address = new Uri(uri);
         })
+        .AddHttpMessageHandler(() => new Http11EnforcerHandler())
         .AddInterceptor<GrpcErrorInterceptor>()
         .AddInterceptor<GrpcResilienceInterceptor>()
         .AddResilienceHandler(configureHttpResilienceOptions)
         .ConfigurePrimaryHttpMessageHandler(() =>
         {
-#pragma warning disable S4830 // It's okay for a pet project
-            var handler = new HttpClientHandler
+            var httpClientHandler = new HttpClientHandler
             {
-                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                UseProxy = false
             };
-#pragma warning restore S4830
 
-            return new GrpcWebHandler(GrpcWebMode.GrpcWeb, handler);
+            return new GrpcWebHandler(GrpcWebMode.GrpcWeb, httpClientHandler);
         });
 
         return services;
