@@ -1,7 +1,10 @@
 ﻿using Amazon.CDK;
+using Amazon.CDK.AWS.CertificateManager;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
+using Amazon.CDK.AWS.ElasticLoadBalancingV2;
+using Amazon.CDK.AWS.SSM;
 using Constructs;
 using SceneSplit.Cdk.Helpers;
 using SceneSplit.Configuration;
@@ -22,7 +25,11 @@ public class CompressionApiServiceConstruct : Construct
             Vpc = vpc
         });
 
+        secGroup.AddIngressRule(Peer.Ipv4(vpc.VpcCidrBlock), Port.Tcp(443), "Allow all traffic within VPC");
         secGroup.AddIngressRule(Peer.Ipv4(vpc.VpcCidrBlock), Port.Tcp(80), "Allow all traffic within VPC");
+
+        var certificateArn = StringParameter.ValueForStringParameter(this, "/scene-split/cert-arn");
+        var certificate = Certificate.FromCertificateArn(this, "CompressionApiCertificate", certificateArn);
 
         FargateService = new ApplicationLoadBalancedFargateService(this, "CompressionApiService", new ApplicationLoadBalancedFargateServiceProps
         {
@@ -32,6 +39,9 @@ public class CompressionApiServiceConstruct : Construct
             MemoryLimitMiB = 512,
             Cpu = 256,
             PublicLoadBalancer = false,
+            ListenerPort = 443,
+            Certificate = certificate,
+            Protocol = ApplicationProtocol.HTTPS,
             SecurityGroups = [secGroup],
             TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
             {
@@ -43,6 +53,7 @@ public class CompressionApiServiceConstruct : Construct
                 Environment = new Dictionary<string, string>
                 {
                     { "ASPNETCORE_ENVIRONMENT", "Production" },
+                    { "Kestrel__EndpointDefaults__Protocols", "Http1AndHttp2" },
                     { ImageCompressionApiConfigurationKeys.ALLOWED_IMAGE_TYPES, ".jpg,.jpeg,.png" },
                     { ImageCompressionApiConfigurationKeys.MAX_IMAGE_SIZE, (10 * 1024 * 1024).ToString() }
                 },

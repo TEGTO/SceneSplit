@@ -10,7 +10,7 @@ internal sealed class Http11EnforcerHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        request.Version = HttpVersion.Version11;
+        request.Version = HttpVersion.Version20;
         request.VersionPolicy = HttpVersionPolicy.RequestVersionExact;
         return base.SendAsync(request, cancellationToken);
     }
@@ -37,7 +37,8 @@ public static class ServiceCollectionExtensions
         {
             var httpClientHandler = new HttpClientHandler
             {
-                UseProxy = false
+                UseProxy = false,
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
             };
 
             return new GrpcWebHandler(GrpcWebMode.GrpcWeb, httpClientHandler);

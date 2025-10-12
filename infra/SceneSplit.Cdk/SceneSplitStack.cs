@@ -40,7 +40,7 @@ public class SceneSplitStack : Stack
 
         var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
 
-        var compressionApiUrl = $"http://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
+        var compressionApiUrl = $"https://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
         var apiService = new ApiServiceConstruct(
             this,
             "ApiServiceConstruct",

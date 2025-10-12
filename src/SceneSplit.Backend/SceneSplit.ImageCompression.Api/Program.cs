@@ -1,10 +1,32 @@
-﻿using SceneSplit.ImageCompression.Api.Services;
+﻿using Microsoft.AspNetCore.Server.Kestrel.Core;
+using SceneSplit.ImageCompression.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddGrpc();
 
 builder.Services.AddHealthChecks();
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        options.ListenLocalhost(5163, listenOptions =>
+        {
+            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+            listenOptions.UseHttps();
+            listenOptions.UseConnectionLogging();
+        });
+    }
+    else
+    {
+        options.ListenAnyIP(8080, listenOptions =>
+        {
+            listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+            listenOptions.UseConnectionLogging();
+        });
+    }
+});
 
 var app = builder.Build();
 
