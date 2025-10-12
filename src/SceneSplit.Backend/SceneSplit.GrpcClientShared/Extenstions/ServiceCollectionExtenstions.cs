@@ -1,20 +1,10 @@
 ﻿using Grpc.Net.Client.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
+using SceneSplit.GrpcClientShared.DelegatingHandlers;
 using SceneSplit.GrpcClientShared.Interceptors;
-using System.Net;
 
 namespace SceneSplit.GrpcClientShared.Extenstions;
-
-internal sealed class Http11EnforcerHandler : DelegatingHandler
-{
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        request.Version = HttpVersion.Version11;
-        request.VersionPolicy = HttpVersionPolicy.RequestVersionExact;
-        return base.SendAsync(request, cancellationToken);
-    }
-}
 
 public static class ServiceCollectionExtensions
 {
