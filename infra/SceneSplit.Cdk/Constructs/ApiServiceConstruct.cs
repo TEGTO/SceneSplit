@@ -13,16 +13,16 @@ public class ApiServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService FargateService { get; }
 
-    public ApiServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string compressionApiUrl, ISecurityGroup compressionApiSecGroup, string sceneImageBucket)
+    public ApiServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string compressionApiUrl, string sceneImageBucket)
         : base(scope, id)
     {
-        var apiSecGroup = new SecurityGroup(this, "ApiServiceSecurityGroup", new SecurityGroupProps
+        var secGroup = new SecurityGroup(this, "ApiServiceSecurityGroup", new SecurityGroupProps
         {
             AllowAllOutbound = true,
             Vpc = vpc
         });
 
-        compressionApiSecGroup.AddIngressRule(apiSecGroup, Port.Tcp(443), "Allow api to access compression api");
+        secGroup.AddIngressRule(Peer.Ipv4(vpc.VpcCidrBlock), Port.Tcp(8080), "Allow all traffic within VPC");
 
         FargateService = new ApplicationLoadBalancedFargateService(this, "ApiService", new ApplicationLoadBalancedFargateServiceProps
         {
@@ -50,7 +50,7 @@ public class ApiServiceConstruct : Construct
                     StreamPrefix = "apiServiceLogs"
                 }),
             },
-            SecurityGroups = [apiSecGroup],
+            SecurityGroups = [secGroup],
             MemoryLimitMiB = 512,
             Cpu = 256,
             PublicLoadBalancer = false,

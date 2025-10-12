@@ -40,21 +40,19 @@ public class SceneSplitStack : Stack
 
         var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
 
-        var compressionApiUrl = $"https://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
+        var compressionApiUrl = $"http://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
         var apiService = new ApiServiceConstruct(
             this,
             "ApiServiceConstruct",
             cluster,
             vpc,
             compressionApiUrl,
-            compressionApiService.FargateService.Service.Connections.SecurityGroups[0],
             sceneImageBucket.BucketName
         );
 
         sceneImageBucket.GrantReadWrite(apiService.FargateService.TaskDefinition.TaskRole);
 
         var apiEndpoint = $"http://{apiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
-        _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, vpc, apiEndpoint,
-            apiService.FargateService.Service.Connections.SecurityGroups[0]);
+        _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, vpc, apiEndpoint);
     }
 }

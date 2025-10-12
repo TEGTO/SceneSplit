@@ -8,8 +8,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        "Logging__LogLevel__Default": "Debug",
-        "Kestrel__EndpointDefaults__Protocols": "Http2"
+        "Logging__LogLevel__Default": "Debug"
       }
     }
   }

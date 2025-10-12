@@ -12,7 +12,7 @@ public class FrontendServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService Service { get; }
 
-    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string apiEndpoint, ISecurityGroup apiSecGroup)
+    public FrontendServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string apiEndpoint)
         : base(scope, id)
     {
         var frontendSecGroup = new SecurityGroup(this, "FrontendServiceSecurityGroup", new SecurityGroupProps
@@ -20,8 +20,6 @@ public class FrontendServiceConstruct : Construct
             AllowAllOutbound = true,
             Vpc = vpc
         });
-
-        apiSecGroup.AddIngressRule(frontendSecGroup, Port.Tcp(8080), "Allow frontend to access API");
 
         Service = new ApplicationLoadBalancedFargateService(this, "FrontendService", new ApplicationLoadBalancedFargateServiceProps
         {
