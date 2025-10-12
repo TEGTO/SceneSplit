@@ -4,12 +4,11 @@
     "SceneSplit.ImageCompression.Api": {
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "https://localhost:5163",
+      "applicationUrl": "http://localhost:5163",
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        "Logging__LogLevel__Default": "Debug",
-        "Kestrel__EndpointDefaults__Protocols": "Http1AndHttp2"
+        "Logging__LogLevel__Default": "Debug"
       }
     }
   }
