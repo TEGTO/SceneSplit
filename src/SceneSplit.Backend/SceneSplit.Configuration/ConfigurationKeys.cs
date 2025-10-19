@@ -12,8 +12,24 @@ public static class ApiConfigurationKeys
     public static string RESIZE_HEIGHT { get; } = nameof(RESIZE_HEIGHT);
 }
 
+public static class WorkflowTags
+{
+    public const string USER_ID_TAG = "UserId";
+    public const string WORKFLOW_ID = "WorkflowId";
+
+    public const string UNKNOWN = "unknown";
+    public static readonly IEnumerable<string> ALL_TAGS = [USER_ID_TAG, WORKFLOW_ID];
+}
+
 public static class ImageCompressionApiConfigurationKeys
 {
     public static string ALLOWED_IMAGE_TYPES { get; } = nameof(ALLOWED_IMAGE_TYPES);
     public static string MAX_IMAGE_SIZE { get; } = nameof(MAX_IMAGE_SIZE);
+}
+
+public static class SceneAnalysisLambdaConfigurationKeys
+{
+    public static string SQS_QUEUE_URL { get; } = nameof(SQS_QUEUE_URL);
+    public static string MAX_ITEMS { get; } = nameof(MAX_ITEMS);
+    public static string BEDROCK_MODEL_ID { get; } = nameof(BEDROCK_MODEL_ID);
 }

@@ -1,0 +1,9 @@
+{
+  "profile": "",
+  "region": "",
+  "configuration": "Release",
+  "function-runtime": "dotnet8",
+  "function-memory-size": 512,
+  "function-timeout": 30,
+  "function-handler": "SceneSplit.SceneAnalysisLambda::SceneSplit.SceneAnalysisLambda.Function::Handler"
+}

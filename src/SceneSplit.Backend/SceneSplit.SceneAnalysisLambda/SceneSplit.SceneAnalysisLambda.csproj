@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<RestorePackages>true</RestorePackages>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<AWSProjectType>Lambda</AWSProjectType>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+	</PropertyGroup>
+	
+  <ItemGroup>
+	  <PackageReference Include="Amazon.Lambda.Core" />
+	  <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
+	  <PackageReference Include="Amazon.Lambda.S3Events" />
+	  <PackageReference Include="AWSSDK.Extensions.Bedrock.MEAI" />
+	  <PackageReference Include="AWSSDK.S3" />
+	  <PackageReference Include="AWSSDK.SQS" />
+	  <PackageReference Include="Microsoft.Extensions.AI" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
+    <ProjectReference Include="..\SceneSplit.SceneAnalysisLambda.Sdk\SceneSplit.SceneAnalysisLambda.Sdk.csproj" />
+  </ItemGroup>
+</Project>

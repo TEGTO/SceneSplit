@@ -5,8 +5,6 @@ namespace SceneSplit.Api.Services.StorageService;
 
 public class S3StorageService : IStorageService
 {
-    private const string USER_ID_TAG = "UserId";
-
     private readonly ITransferUtility transferUtility;
     private readonly string bucketName;
 
@@ -34,7 +32,8 @@ public class S3StorageService : IStorageService
             ContentType = contentType,
             TagSet =
             [
-                new () { Key = USER_ID_TAG, Value = userId }
+                new () { Key = WorkflowTags.USER_ID_TAG, Value = userId },
+                new () { Key = WorkflowTags.WORKFLOW_ID, Value = Guid.NewGuid().ToString() }
             ]
         };
 

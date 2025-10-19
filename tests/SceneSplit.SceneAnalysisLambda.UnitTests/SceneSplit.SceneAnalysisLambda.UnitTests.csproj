@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SceneSplit.Backend\SceneSplit.SceneAnalysisLambda\SceneSplit.SceneAnalysisLambda.csproj" />
+  </ItemGroup>
+</Project>

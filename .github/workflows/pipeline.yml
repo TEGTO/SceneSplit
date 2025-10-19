@@ -116,6 +116,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
+      - name: Install Amazon Lambda Tools
+        run: dotnet tool install -g Amazon.Lambda.Tools
+
       - name: Build backend solution
         run: dotnet build src/SceneSplit.Backend/SceneSplit.Backend.sln --configuration Release
 
