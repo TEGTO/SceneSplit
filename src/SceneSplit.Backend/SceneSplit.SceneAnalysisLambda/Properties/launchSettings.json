@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "Mock Lambda Test Tool": {
+      "commandName": "Executable",
+      "commandLineArgs": "--port 5050",
+      "workingDirectory": ".\\bin\\$(Configuration)\\net8.0",
+      "executablePath": "%USERPROFILE%\\.dotnet\\tools\\dotnet-lambda-test-tool-8.0.exe",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "SQS_QUEUE_URL": "scene-split-scene-images",
+        "MAX_ITEMS": "5",
+        "BEDROCK_MODEL_ID": "arn:aws:bedrock:eu-central-1:982081081153:inference-profile/eu.amazon.nova-lite-v1:0"
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 namespace SceneSplit.GrpcClientShared.DelegatingHandlers;
 
-internal sealed class Http11EnforcerHandler : DelegatingHandler
+public sealed class Http11EnforcerHandler : DelegatingHandler
 {
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
