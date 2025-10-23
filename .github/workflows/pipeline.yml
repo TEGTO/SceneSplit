@@ -211,7 +211,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-publish
-          path: src/SceneSplit.Backend/publish
+          path: ./publish
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -251,7 +251,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: backend-publish
-          path: src/SceneSplit.Backend/publish
+          path: ./publish
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
