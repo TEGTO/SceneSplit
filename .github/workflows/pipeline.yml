@@ -202,9 +202,16 @@ jobs:
   cdk-synth:
     name: CDK Synth
     runs-on: ubuntu-latest
+    needs: backend-ci
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download backend publish artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-publish
+          path: src/SceneSplit.Backend/publish
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -233,6 +240,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download frontend build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: src/SceneSplit.Frontend/dist
+
+      - name: Download backend publish artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-publish
+          path: src/SceneSplit.Backend/publish
 
       - name: Set up Node.js
         uses: actions/setup-node@v3

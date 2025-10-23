@@ -37,7 +37,7 @@ public class SceneAnalysisLambdaConstruct : Construct
             FunctionName = "scene-split-scene-analysis-lambda",
             Runtime = Runtime.DOTNET_8,
             Handler = "SceneSplit.SceneAnalysisLambda::SceneSplit.SceneAnalysisLambda.Function::Handler",
-            Code = Code.FromAsset("src/SceneSplit.Backend/publish/SceneSplit.SceneAnalysisLambda.zip"),
+            Code = Code.FromAsset("publish/SceneSplit.SceneAnalysisLambda.zip"),
             Timeout = Duration.Seconds(30),
             MemorySize = 128,
             Vpc = vpc,
