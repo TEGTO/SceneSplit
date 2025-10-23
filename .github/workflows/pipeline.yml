@@ -199,6 +199,12 @@ jobs:
           name: backend-publish
           path: ./publish
 
+      - name: Upload backend lambda publish build
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-lambda-publish
+          path: ./lambda-publish
+
   cdk-synth:
     name: CDK Synth
     runs-on: ubuntu-latest
@@ -207,11 +213,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download backend publish artifact
+      - name: Download backend lambda publish artifact
         uses: actions/download-artifact@v4
         with:
-          name: backend-publish
-          path: ./publish
+          name: backend-lambda-publish
+          path: ./lambda-publish
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -247,11 +253,11 @@ jobs:
           name: frontend-build
           path: src/SceneSplit.Frontend/dist
 
-      - name: Download backend publish artifact
+      - name: Download backend lambda publish artifact
         uses: actions/download-artifact@v4
         with:
-          name: backend-publish
-          path: ./publish
+          name: backend-lambda-publish
+          path: ./lambda-publish
 
       - name: Set up Node.js
         uses: actions/setup-node@v3

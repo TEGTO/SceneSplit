@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<Configuration>Release</Configuration>
 		<Framework>net8.0</Framework>
-		<PublishDir>..\..\..\publish</PublishDir>
+		<PublishDir>..\..\..\lambda-publish</PublishDir>
 	</PropertyGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
