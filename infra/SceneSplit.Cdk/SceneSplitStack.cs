@@ -3,6 +3,7 @@ using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.ServiceDiscovery;
+using Amazon.CDK.AWS.SQS;
 using Constructs;
 using SceneSplit.Cdk.Constructs;
 using Cluster = Amazon.CDK.AWS.ECS.Cluster;
@@ -38,6 +39,14 @@ public class SceneSplitStack : Stack
             Encryption = BucketEncryption.S3_MANAGED
         });
 
+        var sceneImageQueue = new Queue(this, "SceneSplitSceneImagesQueue", new QueueProps
+        {
+            QueueName = "scene-split-scene-images",
+            VisibilityTimeout = Duration.Seconds(60),
+            RetentionPeriod = Duration.Days(1),
+            RemovalPolicy = RemovalPolicy.DESTROY
+        });
+
         var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
 
         var compressionApiUrl = $"http://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
@@ -47,10 +56,16 @@ public class SceneSplitStack : Stack
             cluster,
             vpc,
             compressionApiUrl,
-            sceneImageBucket.BucketName
+            sceneImageBucket
         );
 
-        sceneImageBucket.GrantReadWrite(apiService.FargateService.TaskDefinition.TaskRole);
+        _ = new SceneAnalysisLambdaConstruct(
+            this,
+            "SceneAnalysisLambdaConstruct",
+            vpc,
+            sceneImageBucket,
+            sceneImageQueue
+       );
 
         var apiEndpoint = $"http://{apiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
         _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, vpc, apiEndpoint);

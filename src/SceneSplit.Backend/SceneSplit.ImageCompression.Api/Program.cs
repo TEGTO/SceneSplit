@@ -1,8 +1,18 @@
-﻿using SceneSplit.ImageCompression.Api.Services;
+﻿using SceneSplit.Configuration;
+using SceneSplit.ImageCompression.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddGrpc();
+var maxMessageSizeBytes = int.Parse(
+    builder.Configuration[ImageCompressionApiConfigurationKeys.MAX_IMAGE_SIZE] ??
+    (10 * 1024 * 1024).ToString()
+);
+
+builder.Services.AddGrpc(options =>
+{
+    options.MaxReceiveMessageSize = maxMessageSizeBytes;
+    options.MaxSendMessageSize = maxMessageSizeBytes;
+});
 
 builder.Services.AddHealthChecks();
 

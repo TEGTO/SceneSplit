@@ -8,11 +8,12 @@ using SceneSplit.Api.Services.StorageService;
 using SceneSplit.Configuration;
 using SceneSplit.ImageCompression.Sdk;
 using SceneSplit.TestShared.Helpers;
+using System.Text.RegularExpressions;
 
 namespace SceneSplit.Api.UnitTests.Commands.ProcessSceneImage;
 
 [TestFixture]
-public class ProcessSceneImageCommandHandlerTests
+public partial class ProcessSceneImageCommandHandlerTests
 {
     private Mock<Compression.CompressionClient> compressionClientMock;
     private Mock<IStorageService> storageServiceMock;
@@ -51,7 +52,7 @@ public class ProcessSceneImageCommandHandlerTests
     {
         // Arrange
         var fakeData = CreateFakeImageData();
-        var command = new ProcessSceneImageCommand("user123", "scene.jpg", fakeData);
+        var command = new ProcessSceneImageCommand("user123", "scene.png", fakeData);
 
         var compressionReply = new CompressionReply
         {
@@ -87,7 +88,8 @@ public class ProcessSceneImageCommandHandlerTests
         compressionClientMock.Verify(c =>
             c.CompressImageAsync(
                 It.Is<CompressionRequest>(r =>
-                    r.FileName == command.FileName &&
+                    GuidRegex().IsMatch(Path.GetFileNameWithoutExtension(r.FileName)) &&
+                    r.FileName.Contains(".png") &&
                     r.Quality == 75),
                 null,
                 null,
@@ -96,7 +98,10 @@ public class ProcessSceneImageCommandHandlerTests
 
         storageServiceMock.Verify(s =>
             s.UploadSceneImageAsync(
-                command.FileName,
+                It.Is<string>(filename =>
+                    GuidRegex().IsMatch(Path.GetFileNameWithoutExtension(filename)) &&
+                    Path.GetExtension(filename).Equals(".jpg", StringComparison.InvariantCultureIgnoreCase)
+                ),
                 It.IsAny<byte[]>(),
                 "image/jpg",
                 command.UserId,
@@ -131,4 +136,7 @@ public class ProcessSceneImageCommandHandlerTests
 
         Assert.That(ex.Message, Does.Contain("File size exceeds"));
     }
+
+    [GeneratedRegex(@"^[0-9a-fA-F\-]{36}$")]
+    private static partial Regex GuidRegex();
 }

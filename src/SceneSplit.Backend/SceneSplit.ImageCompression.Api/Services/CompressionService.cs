@@ -1,10 +1,10 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
 using SceneSplit.Configuration;
+using SceneSplit.ImageCompression.Api.Helpers;
 using SceneSplit.ImageCompression.Sdk;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
 
 namespace SceneSplit.ImageCompression.Api.Services;
@@ -19,7 +19,7 @@ public class CompressionService : Compression.CompressionBase
     public CompressionService(IConfiguration configuration)
     {
         var allowedImageTypesConfig = configuration[ImageCompressionApiConfigurationKeys.ALLOWED_IMAGE_TYPES] ?? ".jpg,.jpeg,.png";
-        var maxFileSizeInBytesConfig = configuration[ImageCompressionApiConfigurationKeys.MAX_IMAGE_SIZE] ?? ToBytes(10).ToString();
+        var maxFileSizeInBytesConfig = configuration[ImageCompressionApiConfigurationKeys.MAX_IMAGE_SIZE] ?? SizeConversionHelper.ToBytes(10).ToString();
 
         allowedImageTypes = allowedImageTypesConfig.Split(',');
         maxFileSizeInBytes = int.Parse(maxFileSizeInBytesConfig);
@@ -29,7 +29,6 @@ public class CompressionService : Compression.CompressionBase
     {
         ValidateRequest(request);
 
-        var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
         var quality = request.Quality > 0 ? request.Quality : DEFAULT_QUALITY;
 
         using var input = new MemoryStream(request.ImageData.ToByteArray());
@@ -39,25 +38,17 @@ public class CompressionService : Compression.CompressionBase
 
         using var output = new MemoryStream();
 
-        if (extension == ".png")
+        await resized.SaveAsync(output, new JpegEncoder
         {
-            await resized.SaveAsync(output, new PngEncoder
-            {
-                CompressionLevel = MapQualityToPngCompressionLevel(quality),
-                FilterMethod = PngFilterMethod.Adaptive
-            }, context.CancellationToken);
-        }
-        else
-        {
-            await resized.SaveAsync(output, new JpegEncoder { Quality = quality }, context.CancellationToken);
-        }
+            Quality = quality
+        }, context.CancellationToken);
 
         var compressedBytes = output.ToArray();
 
         return new CompressionReply
         {
             CompressedImage = ByteString.CopyFrom(compressedBytes),
-            Format = extension.TrimStart('.'),
+            Format = "jpg",
             OriginalSize = request.ImageData.Length,
             CompressedSize = compressedBytes.Length,
             NewWidth = resized.Width,
@@ -109,7 +100,7 @@ public class CompressionService : Compression.CompressionBase
 
         if (request.ImageData.Length > maxFileSizeInBytes)
         {
-            throw new RpcException(new Status(StatusCode.InvalidArgument, $"File size exceeds {ToMB(maxFileSizeInBytes)}MB limit."));
+            throw new RpcException(new Status(StatusCode.InvalidArgument, $"File size exceeds {SizeConversionHelper.ToMB(maxFileSizeInBytes)}MB limit."));
         }
 
         var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
@@ -118,25 +109,4 @@ public class CompressionService : Compression.CompressionBase
             throw new RpcException(new Status(StatusCode.InvalidArgument, $"File extension '{extension}' is not supported."));
         }
     }
-
-    private static PngCompressionLevel MapQualityToPngCompressionLevel(int quality)
-    {
-        var level = Math.Clamp((int)Math.Round((100 - quality) / 11.0), 0, 9);
-        return level switch
-        {
-            0 => PngCompressionLevel.Level0,
-            1 => PngCompressionLevel.Level1,
-            2 => PngCompressionLevel.Level2,
-            3 => PngCompressionLevel.Level3,
-            4 => PngCompressionLevel.Level4,
-            5 => PngCompressionLevel.Level5,
-            6 => PngCompressionLevel.Level6,
-            7 => PngCompressionLevel.Level7,
-            8 => PngCompressionLevel.Level8,
-            _ => PngCompressionLevel.Level9
-        };
-    }
-
-    private static int ToMB(int bytes) => bytes / (1024 * 1024);
-    private static int ToBytes(int mb) => mb * 1024 * 1024;
 }

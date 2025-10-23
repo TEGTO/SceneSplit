@@ -25,7 +25,11 @@ builder.Services.AddApplicationCors(builder.Configuration, myAllowSpecificOrigin
 var compressionApiUrl = builder.Configuration[ApiConfigurationKeys.COMPRESSION_API_URL]
     ?? throw new InvalidOperationException($"{ApiConfigurationKeys.COMPRESSION_API_URL} is missing or null.");
 
-builder.Services.AddGrpcClientWeb<Compression.CompressionClient>(compressionApiUrl);
+builder.Services.AddGrpcClientWeb<Compression.CompressionClient>(compressionApiUrl, configureChannelOptions: (sp, options) =>
+{
+    options.MaxReceiveMessageSize = maxImageSize;
+    options.MaxSendMessageSize = maxImageSize;
+});
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
