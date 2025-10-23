@@ -2,6 +2,7 @@
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
+using Amazon.CDK.AWS.S3;
 using Constructs;
 using SceneSplit.Cdk.Helpers;
 using SceneSplit.Configuration;
@@ -13,7 +14,7 @@ public class ApiServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService FargateService { get; }
 
-    public ApiServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string compressionApiUrl, string sceneImageBucket)
+    public ApiServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string compressionApiUrl, Bucket sceneImageBucket)
         : base(scope, id)
     {
         var secGroup = new SecurityGroup(this, "ApiServiceSecurityGroup", new SecurityGroupProps
@@ -43,7 +44,7 @@ public class ApiServiceConstruct : Construct
                     { ApiConfigurationKeys.MAX_IMAGE_SIZE, (10 * 1024 * 1024).ToString() },
                     { ApiConfigurationKeys.ALLOWED_IMAGE_TYPES, ".jpg,.jpeg,.png" },
                     { ApiConfigurationKeys.COMPRESSION_API_URL, compressionApiUrl },
-                    { ApiConfigurationKeys.SCENE_IMAGE_BUCKET, sceneImageBucket },
+                    { ApiConfigurationKeys.SCENE_IMAGE_BUCKET, sceneImageBucket.BucketName },
                 },
                 LogDriver = LogDriver.AwsLogs(new AwsLogDriverProps
                 {
@@ -69,5 +70,7 @@ public class ApiServiceConstruct : Construct
             HealthyThresholdCount = 2,
             UnhealthyThresholdCount = 3
         });
+
+        sceneImageBucket.GrantReadWrite(FargateService.TaskDefinition.TaskRole);
     }
 }

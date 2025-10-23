@@ -1,4 +1,5 @@
-﻿using Grpc.Net.Client.Web;
+﻿using Grpc.Net.Client;
+using Grpc.Net.Client.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using SceneSplit.GrpcClientShared.DelegatingHandlers;
@@ -9,7 +10,8 @@ namespace SceneSplit.GrpcClientShared.Extenstions;
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddGrpcClientWeb<TClient>(this IServiceCollection services,
-        string uri, Action<HttpStandardResilienceOptions>? configureHttpResilienceOptions = null)
+        string uri, Action<HttpStandardResilienceOptions>? configureHttpResilienceOptions = null,
+        Action<IServiceProvider, GrpcChannelOptions>? configureChannelOptions = null)
         where TClient : class
     {
         services.AddTransient<GrpcErrorInterceptor>();
@@ -18,6 +20,10 @@ public static class ServiceCollectionExtensions
         services.AddGrpcClient<TClient>(o =>
         {
             o.Address = new Uri(uri);
+        })
+        .ConfigureChannel((provider, options) =>
+        {
+            configureChannelOptions?.Invoke(provider, options);
         })
         .AddHttpMessageHandler(() => new Http11EnforcerHandler())
         .AddInterceptor<GrpcErrorInterceptor>()

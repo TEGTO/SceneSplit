@@ -9,7 +9,7 @@
         "DOTNET_ENVIRONMENT": "Development",
         "SQS_QUEUE_URL": "scene-split-scene-images",
         "MAX_ITEMS": "5",
-        "BEDROCK_MODEL_ID": "arn:aws:bedrock:eu-central-1:982081081153:inference-profile/eu.amazon.nova-lite-v1:0"
+        "BEDROCK_MODEL_ID": ""
       }
     }
   }

@@ -50,8 +50,8 @@ public sealed class Function
             {
                 var workflowTags = await GetWorkflowTagsAsync(bucket, key);
 
-                var imageBytes = await DownloadImageAsync(bucket, key);
-                var items = await AnalyzeImageAsync(imageBytes);
+                var (imageBytes, mimeType) = await DownloadImageAsync(bucket, key);
+                var items = await AnalyzeImageAsync(imageBytes, mimeType);
 
                 if (items.Count == 0)
                 {
@@ -70,6 +70,7 @@ public sealed class Function
             catch (Exception ex)
             {
                 context.Logger.LogError(ex, $"Failed to process image {bucket}/{key}");
+                throw;
             }
         }
     }
@@ -95,15 +96,19 @@ public sealed class Function
         return tagsDict;
     }
 
-    private async Task<byte[]> DownloadImageAsync(string bucket, string key)
+    private async Task<(byte[] Bytes, string MimeType)> DownloadImageAsync(string bucket, string key)
     {
         using var response = await s3Client.GetObjectAsync(bucket, key);
+
+        var mime = response.Headers.ContentType ?? "image/jpeg";
+
         await using var ms = new MemoryStream();
         await response.ResponseStream.CopyToAsync(ms);
-        return ms.ToArray();
+
+        return (ms.ToArray(), mime);
     }
 
-    private async Task<List<string>> AnalyzeImageAsync(byte[] imageBytes)
+    private async Task<List<string>> AnalyzeImageAsync(byte[] imageBytes, string mimeType)
     {
         var message = new ChatMessage(ChatRole.User, $$"""
             Analyze the image and return up to {{options.MaxItems}} items as a JSON array of strings.
@@ -112,7 +117,8 @@ public sealed class Function
                 "items": ["item1", "item2", "item3"]
             }
             """);
-        message.Contents.Add(new DataContent(imageBytes, "image/jpeg"));
+
+        message.Contents.Add(new DataContent(imageBytes, mimeType));
 
         var response = await aiClient.GetResponseAsync<SceneAnalysisAIResponse>(message);
         return response.Result.Items ?? [];

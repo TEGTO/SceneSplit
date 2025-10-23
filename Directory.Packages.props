@@ -16,7 +16,6 @@
     <PackageVersion Include="Amazon.Lambda.Core" Version="2.5.0" />
     <PackageVersion Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.4" />
     <PackageVersion Include="Amazon.Lambda.S3Events" Version="3.1.0" />
-    <PackageVersion Include="AWSSDK.S3" Version="3.7.406.4" />
     <PackageVersion Include="Grpc.AspNetCore" Version="2.71.0" />
     <PackageVersion Include="Grpc.AspNetCore.Web" Version="2.71.0" />
     <PackageVersion Include="Grpc.Core.Api" Version="2.71.0" />

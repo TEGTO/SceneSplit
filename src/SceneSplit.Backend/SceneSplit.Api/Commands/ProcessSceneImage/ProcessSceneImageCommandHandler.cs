@@ -50,9 +50,11 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
             throw new HubException($"File size exceeds {ToMB(maxFileSizeInBytes)}MB limit.");
         }
 
+        var tempFileName = $"{Guid.NewGuid()}{extension}";
+
         var compressionRequest = new CompressionRequest
         {
-            FileName = request.FileName,
+            FileName = tempFileName,
             ImageData = Google.Protobuf.ByteString.CopyFrom(request.FileContent),
             Quality = imageQuality,
             ResizeWidth = resizeWidth,
@@ -62,8 +64,10 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
 
         var response = await compressionClient.CompressImageAsync(compressionRequest, cancellationToken: cancellationToken);
 
+        var newFileName = $"{Path.GetFileNameWithoutExtension(tempFileName)}.{response.Format}";
+
         await storageService.UploadSceneImageAsync(
-            request.FileName,
+            newFileName,
             response.CompressedImage.ToByteArray(),
             $"image/{response.Format}",
             request.UserId,

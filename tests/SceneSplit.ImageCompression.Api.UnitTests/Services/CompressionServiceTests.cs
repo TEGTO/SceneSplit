@@ -51,7 +51,7 @@ public class CompressionServiceTests
         {
             FileName = "test.png",
             ImageData = ByteString.CopyFrom(imageData),
-            Quality = 50
+            Quality = 10
         };
 
         // Act
@@ -62,12 +62,12 @@ public class CompressionServiceTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(result.CompressedImage.Length, Is.LessThan(request.ImageData.Length));
-            Assert.That(result.Format, Is.EqualTo("png"));
+            Assert.That(result.Format, Is.EqualTo("jpg"));
         }
     }
 
     [Test]
-    public async Task CompressImage_ValidPngImage_ReturnsCompressedImage()
+    public async Task CompressImage_ValidPngImage_ReturnsCompressedAsJpg()
     {
         // Arrange
         using var image = new Image<Rgba32>(50, 50);
@@ -85,7 +85,7 @@ public class CompressionServiceTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.Format, Is.EqualTo("png"));
+            Assert.That(result.Format, Is.EqualTo("jpg"));
             Assert.That(result.CompressedSize, Is.GreaterThan(0));
         });
     }
