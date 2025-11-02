@@ -21,7 +21,6 @@ public class FunctionTests
     private Mock<ITransferUtility> transferMock = null!;
     private Mock<Compression.CompressionClient> compressionMock = null!;
     private Mock<ILogger<Function>> loggerMock = null!;
-
     private ObjectImageSearchLambdaOptions options = null!;
 
     [SetUp]
@@ -101,6 +100,28 @@ public class FunctionTests
     }
 
     [Test]
+    public void Handler_WhenMessageDeserializesToNull_ThrowsInvalidOperation_AndLogsSkipAndError()
+    {
+        // Arrange
+        var http = new HttpClient(new StubHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)));
+        var function = new Function(transferMock.Object, options, http, compressionMock.Object, loggerMock.Object);
+
+        var sqsEvent = CreateSqsEvent("null");
+        // Act
+        var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>()));
+
+        // Assert
+        Assert.That(ex, Is.Not.Null);
+        Assert.That(ex!.Message, Does.Contain("Invalid message format"));
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingMessage));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.SkippingInvalidMessage));
+        loggerMock.VerifyLog(LogLevel.Error, Times.Once(), nameof(Log.FailedToProcessWithException));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Never(), nameof(Log.ProcessedSuccessfully));
+    }
+
+    [Test]
     public void Handler_WhenSearchHttpFails_ThrowsAndLogs()
     {
         // Arrange
@@ -148,22 +169,20 @@ public class FunctionTests
                 };
             }
 
-            // Image download
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new ByteArrayContent([9, 9, 9])
             };
         }));
 
-        var compressionReply = new CompressionReply
+        var reply = new CompressionReply
         {
             CompressedImage = ByteString.CopyFrom([1, 2, 3]),
             Format = "jpg",
             OriginalSize = 3,
             CompressedSize = 3
         };
-
-        var asyncUnaryCall = GrpcTestHelpers.CreateAsyncUnaryCall(compressionReply);
+        var asyncUnaryCall = GrpcTestHelpers.CreateAsyncUnaryCall(reply);
 
         compressionMock
             .Setup(c => c.CompressImageAsync(
@@ -240,15 +259,14 @@ public class FunctionTests
             };
         }));
 
-        var compressionReply = new CompressionReply
+        var reply = new CompressionReply
         {
             CompressedImage = ByteString.CopyFrom([4, 5, 6]),
             Format = "jpeg",
             OriginalSize = 3,
             CompressedSize = 3
         };
-
-        var asyncUnaryCall = GrpcTestHelpers.CreateAsyncUnaryCall(compressionReply);
+        var asyncUnaryCall = GrpcTestHelpers.CreateAsyncUnaryCall(reply);
 
         compressionMock
             .Setup(c => c.CompressImageAsync(
@@ -282,6 +300,78 @@ public class FunctionTests
                 It.IsAny<Metadata>(),
                 null,
                 It.IsAny<CancellationToken>()), Times.Exactly(2));
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingMessage));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.SearchingImages));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Exactly(2), nameof(Log.DownloadingImage));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Exactly(2), nameof(Log.UploadedToBucket));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessedSuccessfully));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Never(), nameof(Log.NoImagesFound));
+    }
+
+    [Test]
+    public async Task Handler_WhenSearchReturnsArrayRoot_WithFullAndSmallUrls_CompressesAndUploads()
+    {
+        // Arrange
+        var arrayRootJson = """
+        [
+          { "urls": { "full": "http://images.local/full.jpg" } },
+          { "urls": { "small": "http://images.local/small.jpg" } }
+        ]
+        """;
+
+        var http = new HttpClient(new StubHandler(req =>
+        {
+            if (req.RequestUri!.AbsoluteUri.StartsWith(options.ImageSearchApiEndpoint))
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(arrayRootJson, Encoding.UTF8, "application/json")
+                };
+            }
+
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent([1, 1, 1])
+            };
+        }));
+
+        var reply = new CompressionReply
+        {
+            CompressedImage = ByteString.CopyFrom([2, 2, 2]),
+            Format = "png",
+            OriginalSize = 3,
+            CompressedSize = 3
+        };
+        var asyncUnaryCall = GrpcTestHelpers.CreateAsyncUnaryCall(reply);
+
+        compressionMock
+            .Setup(c => c.CompressImageAsync(
+                It.IsAny<CompressionRequest>(),
+                It.IsAny<Metadata>(),
+                null,
+                It.IsAny<CancellationToken>()))
+            .Returns(asyncUnaryCall);
+
+        transferMock
+            .Setup(t => t.UploadAsync(It.IsAny<TransferUtilityUploadRequest>(), It.IsAny<CancellationToken>()))
+            .Returns(Task.CompletedTask);
+
+        var function = new Function(transferMock.Object, options, http, compressionMock.Object, loggerMock.Object);
+
+        var message = new SceneAnalysisResult
+        {
+            WorkflowTags = [],
+            Items = ["anything"]
+        };
+        var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
+
+        // Act
+        await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>());
+
+        // Assert
+        transferMock.Verify(t => t.UploadAsync(It.IsAny<TransferUtilityUploadRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
+        compressionMock.Verify(c => c.CompressImageAsync(It.IsAny<CompressionRequest>(), It.IsAny<Metadata>(), null, It.IsAny<CancellationToken>()), Times.Exactly(2));
 
         loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingMessage));
         loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.SearchingImages));
