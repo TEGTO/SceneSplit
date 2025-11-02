@@ -10,6 +10,7 @@ using Moq;
 using SceneSplit.TestShared;
 using System.Text;
 using System.Text.Json;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using Tag = Amazon.S3.Model.Tag;
 
 namespace SceneSplit.SceneAnalysisLambda.UnitTests;
@@ -103,6 +104,10 @@ public class FunctionTests
         sqsMock.Verify(s => s.SendMessageAsync(
             It.Is<SendMessageRequest>(req => req.QueueUrl == options.SqsQueueUrl && req.MessageBody.Contains("item1")),
             It.IsAny<CancellationToken>()), Times.Once);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.PublishedAnalysisResult));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Never(), nameof(Log.NoItemsDetected));
     }
 
     [Test]
@@ -143,6 +148,10 @@ public class FunctionTests
         sqsMock.Verify(s => s.SendMessageAsync(
             It.Is<SendMessageRequest>(req => req.MessageBody.Contains("\"UserId\":\"unknown\"")),
             It.IsAny<CancellationToken>()), Times.Once);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.PublishedAnalysisResult));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Never(), nameof(Log.NoItemsDetected));
     }
 
     [Test]
@@ -178,5 +187,59 @@ public class FunctionTests
         await function.Handler(s3Event, contextMock.Object);
 
         sqsMock.Verify(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.NoItemsDetected));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Never(), nameof(Log.PublishedAnalysisResult));
+    }
+
+    [Test]
+    public void Handler_SqsSendMessageThrows_CaughtAndLogged()
+    {
+        var bucket = "bucket";
+        var key = "key.jpg";
+
+        s3Mock.Setup(s => s.GetObjectTaggingAsync(It.IsAny<GetObjectTaggingRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetObjectTaggingResponse { Tagging = [new Tag { Key = "UserId", Value = "123" }] });
+
+        s3Mock.Setup(s => s.GetObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetObjectResponse { ResponseStream = new MemoryStream(Encoding.UTF8.GetBytes("image bytes")) });
+
+        aiMock.Setup(ai => ai.GetResponseAsync(
+                It.IsAny<IEnumerable<ChatMessage>>(),
+                It.IsAny<ChatOptions?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IEnumerable<ChatMessage> messages, ChatOptions? _, CancellationToken __) =>
+            {
+                var response = new SceneAnalysisAIResponse { Items = ["item1", "item2"] };
+                var assistantMessage = new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(response));
+                return new ChatResponse<SceneAnalysisAIResponse>(new ChatResponse(assistantMessage), new JsonSerializerOptions());
+            });
+
+        sqsMock.Setup(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Exception("SQS failure"));
+
+        var s3Event = new S3Event
+        {
+            Records =
+            [
+                new()
+                {
+                    S3 = new S3Event.S3Entity
+                    {
+                        Bucket = new S3Event.S3BucketEntity { Name = bucket },
+                        Object = new S3Event.S3ObjectEntity { Key = key }
+                    }
+                }
+            ]
+        };
+
+        Assert.ThrowsAsync<Exception>(async () => await function.Handler(s3Event, contextMock.Object));
+
+        sqsMock.Verify(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Error, Times.Once(), nameof(Log.FailedToProcessImage));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Never(), nameof(Log.PublishedAnalysisResult));
     }
 }

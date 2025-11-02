@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SceneSplit.Backend\SceneSplit.ObjectImageSearchLambda\SceneSplit.ObjectImageSearchLambda.csproj" />
+    <ProjectReference Include="..\SceneSplit.TestShared\SceneSplit.TestShared.csproj" />
+  </ItemGroup>
+</Project>

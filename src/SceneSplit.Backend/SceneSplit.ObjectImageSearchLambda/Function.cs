@@ -14,6 +14,11 @@ namespace SceneSplit.ObjectImageSearchLambda;
 
 public sealed class Function
 {
+    private static JsonSerializerOptions jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     private readonly Compression.CompressionClient compressionClient;
     private readonly ITransferUtility transferUtility;
     private readonly ObjectImageSearchLambdaOptions options;
@@ -62,7 +67,7 @@ public sealed class Function
             SceneAnalysisResult? sceneAnalysis;
             try
             {
-                sceneAnalysis = JsonSerializer.Deserialize<SceneAnalysisResult>(record.Body);
+                sceneAnalysis = JsonSerializer.Deserialize<SceneAnalysisResult>(record.Body, jsonOptions);
                 if (sceneAnalysis == null)
                 {
                     Log.SkippingInvalidMessage(logger, record.MessageId);

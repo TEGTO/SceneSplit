@@ -29,4 +29,8 @@
 	<ItemGroup>
 		<Protobuf Include="..\SceneSplit.ImageCompression.Sdk\Protos\compression.proto" Link="Protos\compression.proto" GrpcServices="Client" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="SceneSplit.ObjectImageSearchLambda.UnitTests" />
+	</ItemGroup>
 </Project>
