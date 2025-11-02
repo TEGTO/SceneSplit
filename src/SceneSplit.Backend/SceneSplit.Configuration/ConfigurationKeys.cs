@@ -33,3 +33,15 @@ public static class SceneAnalysisLambdaConfigurationKeys
     public static string MAX_ITEMS { get; } = nameof(MAX_ITEMS);
     public static string BEDROCK_MODEL_ID { get; } = nameof(BEDROCK_MODEL_ID);
 }
+
+public static class ObjectImageSearchLambdaConfigurationKeys
+{
+    public static string BUCKET_NAME { get; } = nameof(BUCKET_NAME);
+    public static string IMAGE_SEARCH_API_KEY { get; } = nameof(IMAGE_SEARCH_API_KEY);
+    public static string IMAGE_SEARCH_API_ENDPOINT { get; } = nameof(IMAGE_SEARCH_API_ENDPOINT);
+    public static string COMPRESSION_API_URL { get; } = nameof(COMPRESSION_API_URL);
+    public static string MAX_IMAGE_SIZE { get; } = nameof(MAX_IMAGE_SIZE);
+    public static string RESIZE_WIDTH { get; } = nameof(RESIZE_WIDTH);
+    public static string RESIZE_HEIGHT { get; } = nameof(RESIZE_HEIGHT);
+    public static string IMAGE_QUALITY_COMPRESSION { get; } = nameof(IMAGE_QUALITY_COMPRESSION);
+}

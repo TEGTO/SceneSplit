@@ -5,7 +5,9 @@ using Amazon.S3.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Moq;
+using SceneSplit.TestShared;
 using System.Text;
 using System.Text.Json;
 using Tag = Amazon.S3.Model.Tag;
@@ -19,10 +21,10 @@ public class FunctionTests
     private Mock<IAmazonSQS> sqsMock = null!;
     private Mock<IChatClient> aiMock = null!;
     private Mock<ILambdaContext> contextMock = null!;
+    private Mock<ILogger<Function>> loggerMock = null!;
 
     private SceneAnalysisLambdaOptions options = null!;
     private Function function = null!;
-    private LambdaLoggerMock loggerMock = null!;
 
     [SetUp]
     public void Setup()
@@ -37,15 +39,15 @@ public class FunctionTests
             SqsQueueUrl = "https://queue-url"
         };
 
-        loggerMock = new LambdaLoggerMock();
+        loggerMock = TestHelper.CreateLoggerMock<Function>();
         contextMock = new Mock<ILambdaContext>();
-        contextMock.Setup(c => c.Logger).Returns(loggerMock);
 
         function = new Function(
             s3Mock.Object,
             sqsMock.Object,
             aiMock.Object,
-            options
+            options,
+            loggerMock.Object
         );
     }
 
@@ -177,10 +179,4 @@ public class FunctionTests
 
         sqsMock.Verify(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
-}
-
-public class LambdaLoggerMock : ILambdaLogger
-{
-    public void Log(string message) { }
-    public void LogLine(string message) { }
 }

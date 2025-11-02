@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<RestorePackages>true</RestorePackages>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<AWSProjectType>Lambda</AWSProjectType>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Amazon.Lambda.Logging.AspNetCore" />
+		<PackageReference Include="Grpc.AspNetCore" />
+		<PackageReference Include="Amazon.Lambda.Core" />
+		<PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
+		<PackageReference Include="Amazon.Lambda.SQSEvents" />
+		<PackageReference Include="AWSSDK.S3" />
+		<PackageReference Include="AWSSDK.SQS" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
+		<ProjectReference Include="..\SceneSplit.GrpcClientShared\SceneSplit.GrpcClientShared.csproj" />
+		<ProjectReference Include="..\SceneSplit.ImageCompression.Sdk\SceneSplit.ImageCompression.Sdk.csproj" />
+		<ProjectReference Include="..\SceneSplit.SceneAnalysisLambda.Sdk\SceneSplit.SceneAnalysisLambda.Sdk.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="..\SceneSplit.ImageCompression.Sdk\Protos\compression.proto" Link="Protos\compression.proto" GrpcServices="Client" />
+	</ItemGroup>
+</Project>

@@ -39,9 +39,9 @@ public class SceneSplitStack : Stack
             Encryption = BucketEncryption.S3_MANAGED
         });
 
-        var sceneImageQueue = new Queue(this, "SceneSplitSceneImagesQueue", new QueueProps
+        var sceneImageDetectedObjectsQueue = new Queue(this, "SceneSplitSceneImagDetectedObjectsQueue", new QueueProps
         {
-            QueueName = "scene-split-scene-images",
+            QueueName = "scene-split-detected-objects",
             VisibilityTimeout = Duration.Seconds(60),
             RetentionPeriod = Duration.Days(1),
             RemovalPolicy = RemovalPolicy.DESTROY
@@ -64,7 +64,7 @@ public class SceneSplitStack : Stack
             "SceneAnalysisLambdaConstruct",
             vpc,
             sceneImageBucket,
-            sceneImageQueue
+            sceneImageDetectedObjectsQueue
        );
 
         var apiEndpoint = $"http://{apiService.FargateService.LoadBalancer.LoadBalancerDnsName}";

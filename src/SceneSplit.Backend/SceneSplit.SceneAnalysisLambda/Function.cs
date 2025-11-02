@@ -6,6 +6,7 @@ using Amazon.S3.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using SceneSplit.Configuration;
 using SceneSplit.SceneAnalysisLambda.Sdk;
 using System.Text.Json;
@@ -20,21 +21,32 @@ public sealed class Function
     private readonly IAmazonSQS sqsClient;
     private readonly IChatClient aiClient;
     private readonly SceneAnalysisLambdaOptions options;
+    private readonly ILogger<Function> logger;
 
     public Function()
     {
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddLambdaLogger());
+        logger = loggerFactory.CreateLogger<Function>();
+
         s3Client = new AmazonS3Client();
         sqsClient = new AmazonSQSClient();
         options = SceneAnalysisLambdaOptions.FromEnvironment();
         aiClient = new AmazonBedrockRuntimeClient().AsIChatClient(options.BedrockModelId);
     }
 
-    public Function(IAmazonS3 s3Client, IAmazonSQS sqsClient, IChatClient aiClient, SceneAnalysisLambdaOptions options)
+    public Function(
+        IAmazonS3 s3Client,
+        IAmazonSQS sqsClient,
+        IChatClient aiClient,
+        SceneAnalysisLambdaOptions options,
+        ILogger<Function> logger)
     {
         this.s3Client = s3Client;
         this.sqsClient = sqsClient;
         this.options = options;
         this.aiClient = aiClient;
+
+        this.logger = logger;
     }
 
     public async Task Handler(S3Event s3Event, ILambdaContext context)
@@ -44,7 +56,7 @@ public sealed class Function
             var bucket = s3Entity.Bucket.Name;
             var key = s3Entity.Object.Key;
 
-            context.Logger.LogInformation($"Processing S3 object: {bucket}/{key}");
+            Log.ProcessingS3Object(logger, bucket, key);
 
             try
             {
@@ -55,7 +67,7 @@ public sealed class Function
 
                 if (items.Count == 0)
                 {
-                    context.Logger.LogWarning($"No items detected in {key}");
+                    Log.NoItemsDetected(logger, key);
                     continue;
                 }
 
@@ -69,7 +81,7 @@ public sealed class Function
             }
             catch (Exception ex)
             {
-                context.Logger.LogError(ex, $"Failed to process image {bucket}/{key}");
+                Log.FailedToProcessImage(logger, ex, bucket, key);
                 throw;
             }
         }
@@ -133,6 +145,6 @@ public sealed class Function
             MessageBody = body
         });
 
-        context.Logger.LogInformation($"Published analysis result to SQS: {body}");
+        Log.PublishedAnalysisResult(logger, body);
     }
 }

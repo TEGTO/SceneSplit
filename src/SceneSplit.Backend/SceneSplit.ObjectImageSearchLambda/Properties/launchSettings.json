@@ -7,9 +7,14 @@
       "executablePath": "%USERPROFILE%\\.dotnet\\tools\\dotnet-lambda-test-tool-8.0.exe",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        "SQS_QUEUE_URL": "scene-split-detected-objects",
-        "MAX_ITEMS": "5",
-        "BEDROCK_MODEL_ID": ""
+        "BUCKET_NAME": "scene-split-object-images",
+        "IMAGE_SEARCH_API_KEY": "",
+        "IMAGE_SEARCH_API_ENDPOINT": "https://api.unsplash.com/search/photos",
+        "COMPRESSION_API_URL": "http://localhost:5163",
+        "MAX_IMAGE_SIZE": "10485760",
+        "RESIZE_WIDTH": "1024",
+        "RESIZE_HEIGHT": "1024",
+        "IMAGE_QUALITY_COMPRESSION": "75"
       }
     }
   }
