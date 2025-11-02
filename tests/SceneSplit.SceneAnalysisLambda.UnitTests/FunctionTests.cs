@@ -1,5 +1,4 @@
-﻿using Amazon.Lambda.Core;
-using Amazon.Lambda.S3Events;
+﻿using Amazon.Lambda.S3Events;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.SQS;
@@ -21,7 +20,6 @@ public class FunctionTests
     private Mock<IAmazonS3> s3Mock = null!;
     private Mock<IAmazonSQS> sqsMock = null!;
     private Mock<IChatClient> aiMock = null!;
-    private Mock<ILambdaContext> contextMock = null!;
     private Mock<ILogger<Function>> loggerMock = null!;
 
     private SceneAnalysisLambdaOptions options = null!;
@@ -41,7 +39,6 @@ public class FunctionTests
         };
 
         loggerMock = TestHelper.CreateLoggerMock<Function>();
-        contextMock = new Mock<ILambdaContext>();
 
         function = new Function(
             s3Mock.Object,
@@ -99,7 +96,7 @@ public class FunctionTests
             ]
         };
 
-        await function.Handler(s3Event, contextMock.Object);
+        await function.Handler(s3Event);
 
         sqsMock.Verify(s => s.SendMessageAsync(
             It.Is<SendMessageRequest>(req => req.QueueUrl == options.SqsQueueUrl && req.MessageBody.Contains("item1")),
@@ -143,7 +140,7 @@ public class FunctionTests
             ]
         };
 
-        await function.Handler(s3Event, contextMock.Object);
+        await function.Handler(s3Event);
 
         sqsMock.Verify(s => s.SendMessageAsync(
             It.Is<SendMessageRequest>(req => req.MessageBody.Contains("\"UserId\":\"unknown\"")),
@@ -184,7 +181,7 @@ public class FunctionTests
             ]
         };
 
-        await function.Handler(s3Event, contextMock.Object);
+        await function.Handler(s3Event);
 
         sqsMock.Verify(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
 
@@ -234,7 +231,7 @@ public class FunctionTests
             ]
         };
 
-        Assert.ThrowsAsync<Exception>(async () => await function.Handler(s3Event, contextMock.Object));
+        Assert.ThrowsAsync<Exception>(async () => await function.Handler(s3Event));
 
         sqsMock.Verify(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Once);
 

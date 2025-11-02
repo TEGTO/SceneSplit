@@ -58,7 +58,7 @@ public sealed class Function
         this.logger = logger;
     }
 
-    public async Task Handler(SQSEvent sqsEvent, ILambdaContext context)
+    public async Task Handler(SQSEvent sqsEvent)
     {
         foreach (var record in sqsEvent.Records)
         {

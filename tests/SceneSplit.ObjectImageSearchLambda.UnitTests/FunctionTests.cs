@@ -68,7 +68,7 @@ public class FunctionTests
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
         // Act
-        await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>());
+        await function.Handler(sqsEvent);
 
         // Assert
         transferMock.Verify(t => t.UploadAsync(It.IsAny<TransferUtilityUploadRequest>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -91,7 +91,7 @@ public class FunctionTests
 
         // Act
         var ex = Assert.ThrowsAsync<JsonException>(async () =>
-            await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>()));
+            await function.Handler(sqsEvent));
 
         // Assert
         Assert.That(ex, Is.Not.Null);
@@ -110,7 +110,7 @@ public class FunctionTests
 
         // Act
         var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>()));
+            await function.Handler(sqsEvent));
 
         // Assert
         Assert.That(ex, Is.Not.Null);
@@ -138,7 +138,7 @@ public class FunctionTests
 
         // Act
         var ex = Assert.ThrowsAsync<HttpRequestException>(async () =>
-            await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>()));
+            await function.Handler(sqsEvent));
 
         // Assert
         Assert.That(ex, Is.Not.Null);
@@ -208,7 +208,7 @@ public class FunctionTests
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
         // Act
-        await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>());
+        await function.Handler(sqsEvent);
 
         // Assert
         transferMock.Verify(t => t.UploadAsync(
@@ -291,7 +291,7 @@ public class FunctionTests
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
         // Act
-        await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>());
+        await function.Handler(sqsEvent);
 
         // Assert
         transferMock.Verify(t => t.UploadAsync(It.IsAny<TransferUtilityUploadRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
@@ -368,7 +368,7 @@ public class FunctionTests
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
         // Act
-        await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>());
+        await function.Handler(sqsEvent);
 
         // Assert
         transferMock.Verify(t => t.UploadAsync(It.IsAny<TransferUtilityUploadRequest>(), It.IsAny<CancellationToken>()), Times.Exactly(2));

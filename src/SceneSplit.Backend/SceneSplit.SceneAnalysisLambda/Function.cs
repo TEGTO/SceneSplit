@@ -49,7 +49,7 @@ public sealed class Function
         this.logger = logger;
     }
 
-    public async Task Handler(S3Event s3Event, ILambdaContext context)
+    public async Task Handler(S3Event s3Event)
     {
         foreach (var s3Entity in s3Event.Records.Select(r => r.S3))
         {
@@ -77,7 +77,7 @@ public sealed class Function
                     Items = items
                 };
 
-                await PublishResultAsync(message, context);
+                await PublishResultAsync(message);
             }
             catch (Exception ex)
             {
@@ -136,7 +136,7 @@ public sealed class Function
         return response.Result.Items ?? [];
     }
 
-    private async Task PublishResultAsync(SceneAnalysisResult message, ILambdaContext context)
+    private async Task PublishResultAsync(SceneAnalysisResult message)
     {
         var body = JsonSerializer.Serialize(message);
         await sqsClient.SendMessageAsync(new SendMessageRequest

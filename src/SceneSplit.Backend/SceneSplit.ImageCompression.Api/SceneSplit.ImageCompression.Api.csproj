@@ -14,4 +14,8 @@
 	<ItemGroup>
 		<Protobuf Include="..\SceneSplit.ImageCompression.Sdk\Protos\compression.proto" Link="Protos\compression.proto" GrpcServices="Server" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="SceneSplit.ImageCompression.Api.UnitTests" />
+	</ItemGroup>
 </Project>
