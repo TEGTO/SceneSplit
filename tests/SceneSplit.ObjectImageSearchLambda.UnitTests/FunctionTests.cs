@@ -107,6 +107,7 @@ public class FunctionTests
         var function = new Function(transferMock.Object, options, http, compressionMock.Object, loggerMock.Object);
 
         var sqsEvent = CreateSqsEvent("null");
+
         // Act
         var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await function.Handler(sqsEvent, Mock.Of<Amazon.Lambda.Core.ILambdaContext>()));
