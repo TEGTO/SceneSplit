@@ -2,11 +2,13 @@
 using Grpc.Core;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SceneSplit.Api.Commands.ProcessSceneImage;
 using SceneSplit.Api.Services.StorageService;
 using SceneSplit.Configuration;
 using SceneSplit.ImageCompression.Sdk;
+using SceneSplit.TestShared;
 using SceneSplit.TestShared.Helpers;
 using System.Text.RegularExpressions;
 
@@ -18,6 +20,7 @@ public partial class ProcessSceneImageCommandHandlerTests
     private Mock<Compression.CompressionClient> compressionClientMock;
     private Mock<IStorageService> storageServiceMock;
     private Mock<IConfiguration> configMock;
+    private Mock<ILogger<ProcessSceneImageCommandHandler>> loggerMock;
 
     private ProcessSceneImageCommandHandler handler;
 
@@ -34,10 +37,13 @@ public partial class ProcessSceneImageCommandHandlerTests
         configMock.Setup(c => c[It.Is<string>(s => s == ApiConfigurationKeys.MAX_IMAGE_SIZE)])
             .Returns((1024 * 1024 * 5).ToString());
 
+        loggerMock = TestHelper.CreateLoggerMock<ProcessSceneImageCommandHandler>();
+
         handler = new ProcessSceneImageCommandHandler(
             compressionClientMock.Object,
             storageServiceMock.Object,
-            configMock.Object);
+            configMock.Object,
+            loggerMock.Object);
     }
 
     private static byte[] CreateFakeImageData(int sizeInKb = 50)
@@ -107,6 +113,12 @@ public partial class ProcessSceneImageCommandHandlerTests
                 command.UserId,
                 It.IsAny<CancellationToken>()),
             Times.Once);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingSceneImage));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.SendingCompressionRequest));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ImageCompressed));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.UploadingToStorage));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.UploadCompleted));
     }
 
     [Test]
@@ -121,6 +133,7 @@ public partial class ProcessSceneImageCommandHandlerTests
             handler.Handle(command, CancellationToken.None));
 
         Assert.That(ex.Message, Does.Contain("not supported"));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.UnsupportedExtension));
     }
 
     [Test]
@@ -135,6 +148,7 @@ public partial class ProcessSceneImageCommandHandlerTests
             handler.Handle(command, CancellationToken.None));
 
         Assert.That(ex.Message, Does.Contain("File size exceeds"));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.FileTooLarge));
     }
 
     [GeneratedRegex(@"^[0-9a-fA-F\-]{36}$")]

@@ -15,14 +15,17 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
     private readonly int imageQuality;
     private readonly int resizeWidth;
     private readonly int resizeHeight;
+    private readonly ILogger<ProcessSceneImageCommandHandler> logger;
 
     public ProcessSceneImageCommandHandler(
         Compression.CompressionClient compressionClient,
         IStorageService storageService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ILogger<ProcessSceneImageCommandHandler> logger)
     {
         this.compressionClient = compressionClient;
         this.storageService = storageService;
+        this.logger = logger;
 
         var allowedImageTypesConfig = configuration[ApiConfigurationKeys.ALLOWED_IMAGE_TYPES] ?? ".jpg,.jpeg,.png";
         var maxFileSizeInBytesConfig = configuration[ApiConfigurationKeys.MAX_IMAGE_SIZE] ?? ToBytes(10).ToString();
@@ -39,14 +42,18 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
 
     public async Task Handle(ProcessSceneImageCommand request, CancellationToken cancellationToken)
     {
+        Log.ProcessingSceneImage(logger, request.UserId, request.FileName, request.FileContent.Length);
+
         var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
         if (!allowedImageTypes.Contains(extension))
         {
+            Log.UnsupportedExtension(logger, extension, request.FileName, string.Join(",", allowedImageTypes));
             throw new HubException("File extension is not supported.");
         }
 
         if (request.FileContent.Length > maxFileSizeInBytes)
         {
+            Log.FileTooLarge(logger, request.FileContent.Length, maxFileSizeInBytes, request.FileName);
             throw new HubException($"File size exceeds {ToMB(maxFileSizeInBytes)}MB limit.");
         }
 
@@ -62,16 +69,25 @@ public class ProcessSceneImageCommandHandler : IRequestHandler<ProcessSceneImage
             KeepAspectRatio = true
         };
 
+        Log.SendingCompressionRequest(logger, tempFileName, imageQuality, resizeWidth, resizeHeight, true);
+
         var response = await compressionClient.CompressImageAsync(compressionRequest, cancellationToken: cancellationToken);
 
+        Log.ImageCompressed(logger, tempFileName, compressionRequest.ImageData.Length, response.CompressedImage.Length, response.Format);
+
         var newFileName = $"{Path.GetFileNameWithoutExtension(tempFileName)}.{response.Format}";
+        var contentType = $"image/{response.Format}";
+
+        Log.UploadingToStorage(logger, newFileName, request.UserId, contentType);
 
         await storageService.UploadSceneImageAsync(
             newFileName,
             response.CompressedImage.ToByteArray(),
-            $"image/{response.Format}",
+            contentType,
             request.UserId,
             cancellationToken);
+
+        Log.UploadCompleted(logger, newFileName, request.UserId);
     }
 
     private static int ToMB(int bytes) => bytes / (1024 * 1024);
