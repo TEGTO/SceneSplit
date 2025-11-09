@@ -45,7 +45,6 @@ public sealed class Function
         this.sqsClient = sqsClient;
         this.options = options;
         this.aiClient = aiClient;
-
         this.logger = logger;
     }
 
@@ -112,12 +111,14 @@ public sealed class Function
     {
         using var response = await s3Client.GetObjectAsync(bucket, key);
 
-        var mime = response.Headers.ContentType ?? "image/jpeg";
+        var rawMime = response.Headers.ContentType;
+
+        var normalized = MimeHelper.NormalizeMime(rawMime, key);
 
         await using var ms = new MemoryStream();
         await response.ResponseStream.CopyToAsync(ms);
 
-        return (ms.ToArray(), mime);
+        return (ms.ToArray(), normalized);
     }
 
     private async Task<List<string>> AnalyzeImageAsync(byte[] imageBytes, string mimeType)

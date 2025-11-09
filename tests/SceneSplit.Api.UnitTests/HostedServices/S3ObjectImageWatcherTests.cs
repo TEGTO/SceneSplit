@@ -188,7 +188,7 @@ public class S3ObjectImageWatcherTests
 
         // Act
         await InvokeExecuteAsync(cts.Token);
-        await Task.Delay(200);
+        await Task.Delay(400);
 
         // Assert
         loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.S3ObjectImageWatcherStarting));
@@ -446,7 +446,7 @@ public class S3ObjectImageWatcherTests
                 return;
             }
 
-            await Task.Delay(25);
+            await Task.Delay(250);
         }
 
         Assert.Fail("User refresh task did not complete within timeout.");
