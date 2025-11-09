@@ -182,8 +182,9 @@ public class S3ObjectImageWatcherTests
         using var cts = new CancellationTokenSource();
         _ = Task.Run(async () =>
         {
-            await Task.Delay(10);
+            await Task.Delay(100);
             await cts.CancelAsync();
+            await Task.Delay(100);
         });
 
         // Act
