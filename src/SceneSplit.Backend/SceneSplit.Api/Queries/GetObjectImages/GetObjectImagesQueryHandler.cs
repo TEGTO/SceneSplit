@@ -41,6 +41,11 @@ public class GetObjectImagesQueryHandler : IRequestHandler<GetObjectImagesQuery,
 
             var listResp = await s3.ListObjectsV2Async(listReq, cancellationToken);
 
+            if (listResp.S3Objects == null || listResp.S3Objects.Count == 0)
+            {
+                break;
+            }
+
             foreach (var obj in listResp.S3Objects)
             {
                 var tagging = await s3.GetObjectTaggingAsync(new GetObjectTaggingRequest
