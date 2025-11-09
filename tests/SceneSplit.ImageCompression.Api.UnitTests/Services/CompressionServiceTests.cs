@@ -1,10 +1,12 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SceneSplit.Configuration;
 using SceneSplit.ImageCompression.Api.Services;
 using SceneSplit.ImageCompression.Sdk;
+using SceneSplit.TestShared;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
@@ -18,6 +20,7 @@ public class CompressionServiceTests
     private CompressionService service;
     private Mock<IConfiguration> configMock;
     private Mock<ServerCallContext> contextMock;
+    private Mock<ILogger<CompressionService>> loggerMock;
 
     [SetUp]
     public void Setup()
@@ -30,8 +33,11 @@ public class CompressionServiceTests
         configMock.Setup(c => c[It.Is<string>(k => k == ImageCompressionApiConfigurationKeys.MAX_IMAGE_SIZE)])
             .Returns((1024 * 1024 * 5).ToString());
 
-        service = new CompressionService(configMock.Object);
+        loggerMock = TestHelper.CreateLoggerMock<CompressionService>();
+
         contextMock = new Mock<ServerCallContext>();
+
+        service = new CompressionService(configMock.Object, loggerMock.Object);
     }
 
     private static byte[] CreateTestImage(int width = 100, int height = 100)
@@ -64,6 +70,8 @@ public class CompressionServiceTests
             Assert.That(result.CompressedImage.Length, Is.LessThan(request.ImageData.Length));
             Assert.That(result.Format, Is.EqualTo("jpg"));
         }
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ReceivedCompressionRequest));
     }
 
     [Test]
@@ -83,11 +91,13 @@ public class CompressionServiceTests
         // Act
         var result = await service.CompressImage(request, contextMock.Object);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.Format, Is.EqualTo("jpg"));
             Assert.That(result.CompressedSize, Is.GreaterThan(0));
-        });
+        }
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ReceivedCompressionRequest));
     }
 
     [Test]
@@ -110,6 +120,8 @@ public class CompressionServiceTests
             Assert.That(ex.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
             Assert.That(ex.Status.Detail, Does.Contain("not supported"));
         }
+
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.UnsupportedExtension));
     }
 
     [Test]
@@ -132,6 +144,8 @@ public class CompressionServiceTests
             Assert.That(ex.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
             Assert.That(ex.Status.Detail, Does.Contain("File size exceeds"));
         }
+
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.FileTooLarge));
     }
 
     [Test]
@@ -153,6 +167,8 @@ public class CompressionServiceTests
             Assert.That(ex.StatusCode, Is.EqualTo(StatusCode.InvalidArgument));
             Assert.That(ex.Status.Detail, Does.Contain("cannot be empty"));
         }
+
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.EmptyImageData));
     }
 
     [Test]

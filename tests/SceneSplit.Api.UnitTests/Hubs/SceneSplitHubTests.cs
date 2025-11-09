@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.SignalR;
 using Moq;
 using SceneSplit.Api.Commands.ProcessSceneImage;
-using SceneSplit.Api.Commands.UpdateObjectImages;
 using SceneSplit.Api.Domain.Models;
 using SceneSplit.Api.Hubs;
 using SceneSplit.Api.Queries.GetObjectImages;
@@ -109,40 +108,11 @@ public class SceneSplitHubTests
     }
 
     [Test]
-    public async Task UpdateImagesForUser_UpdatesImagesAndNotifiesClients()
-    {
-        // Arrange
-        var userId = "user1";
-        var connectionId = "connection1";
-        var images = new List<ObjectImage> { new() { ImageUrl = "some-url", Description = "some-img" } };
-
-        var connectionToUser = typeof(SceneSplitHub).GetStaticFieldValue<ConcurrentDictionary<string, string>>("connectionToUser");
-
-        mockHubCallerClients.Setup(x => x.Group(userId)).Returns(mockClients.Object);
-
-        Assert.That(connectionToUser, Is.Not.Null);
-
-        connectionToUser[connectionId] = userId;
-
-        // Act
-        await sceneSplitHub.UpdateImagesForUser(userId, images);
-
-        // Assert
-        mockMediator.Verify(m => m.Send(It.Is<UpdateObjectImagesCommand>(q => q.UserId == userId), It.IsAny<CancellationToken>()), Times.Once);
-        mockClients.Verify(c => c.ReceiveImageLinks(It.Is<ICollection<ObjectImageResponse>>(imgs => imgs.Count == 1)), Times.Once);
-
-        var userObjectImages = typeof(SceneSplitHub).GetStaticFieldValue<ConcurrentDictionary<string, ICollection<ObjectImage>>>("userObjectImages");
-
-        Assert.That(userObjectImages, Is.Not.Null);
-        Assert.That(images, Is.EqualTo(userObjectImages[userId]));
-    }
-
-    [Test]
     public async Task UploadSceneImageForUser_CallsSceneImageProcessor()
     {
         // Arrange
         var userId = "user1";
-        var request = new SendSceneImageRequest { FileName = "scene.png", FileContent = new byte[] { 1, 2, 3 } };
+        var request = new SendSceneImageRequest { FileName = "scene.png", FileContent = [1, 2, 3] };
 
         // Act
         await sceneSplitHub.UploadSceneImageForUser(userId, request);

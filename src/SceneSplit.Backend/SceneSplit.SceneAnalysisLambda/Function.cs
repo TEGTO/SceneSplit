@@ -6,6 +6,7 @@ using Amazon.S3.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using SceneSplit.Configuration;
 using SceneSplit.SceneAnalysisLambda.Sdk;
 using System.Text.Json;
@@ -20,56 +21,66 @@ public sealed class Function
     private readonly IAmazonSQS sqsClient;
     private readonly IChatClient aiClient;
     private readonly SceneAnalysisLambdaOptions options;
+    private readonly ILogger<Function> logger;
 
     public Function()
     {
+        var loggerFactory = LoggerFactory.Create(builder => builder.AddLambdaLogger());
+        logger = loggerFactory.CreateLogger<Function>();
+
         s3Client = new AmazonS3Client();
         sqsClient = new AmazonSQSClient();
         options = SceneAnalysisLambdaOptions.FromEnvironment();
         aiClient = new AmazonBedrockRuntimeClient().AsIChatClient(options.BedrockModelId);
     }
 
-    public Function(IAmazonS3 s3Client, IAmazonSQS sqsClient, IChatClient aiClient, SceneAnalysisLambdaOptions options)
+    public Function(
+        IAmazonS3 s3Client,
+        IAmazonSQS sqsClient,
+        IChatClient aiClient,
+        SceneAnalysisLambdaOptions options,
+        ILogger<Function> logger)
     {
         this.s3Client = s3Client;
         this.sqsClient = sqsClient;
         this.options = options;
         this.aiClient = aiClient;
+        this.logger = logger;
     }
 
-    public async Task Handler(S3Event s3Event, ILambdaContext context)
+    public async Task Handler(S3Event s3Event)
     {
         foreach (var s3Entity in s3Event.Records.Select(r => r.S3))
         {
             var bucket = s3Entity.Bucket.Name;
             var key = s3Entity.Object.Key;
 
-            context.Logger.LogInformation($"Processing S3 object: {bucket}/{key}");
+            Log.ProcessingS3Object(logger, bucket, key);
 
             try
             {
                 var workflowTags = await GetWorkflowTagsAsync(bucket, key);
 
                 var (imageBytes, mimeType) = await DownloadImageAsync(bucket, key);
-                var items = await AnalyzeImageAsync(imageBytes, mimeType);
+                var objectDescriptions = await AnalyzeImageAsync(imageBytes, mimeType);
 
-                if (items.Count == 0)
+                if (objectDescriptions.Count == 0)
                 {
-                    context.Logger.LogWarning($"No items detected in {key}");
+                    Log.NoItemsDetected(logger, key);
                     continue;
                 }
 
                 var message = new SceneAnalysisResult
                 {
                     WorkflowTags = workflowTags,
-                    Items = items
+                    ObjectDescriptions = objectDescriptions
                 };
 
-                await PublishResultAsync(message, context);
+                await PublishResultAsync(message);
             }
             catch (Exception ex)
             {
-                context.Logger.LogError(ex, $"Failed to process image {bucket}/{key}");
+                Log.FailedToProcessImage(logger, ex, bucket, key);
                 throw;
             }
         }
@@ -100,12 +111,14 @@ public sealed class Function
     {
         using var response = await s3Client.GetObjectAsync(bucket, key);
 
-        var mime = response.Headers.ContentType ?? "image/jpeg";
+        var rawMime = response.Headers.ContentType;
+
+        var normalized = MimeHelper.NormalizeMime(rawMime, key);
 
         await using var ms = new MemoryStream();
         await response.ResponseStream.CopyToAsync(ms);
 
-        return (ms.ToArray(), mime);
+        return (ms.ToArray(), normalized);
     }
 
     private async Task<List<string>> AnalyzeImageAsync(byte[] imageBytes, string mimeType)
@@ -124,7 +137,7 @@ public sealed class Function
         return response.Result.Items ?? [];
     }
 
-    private async Task PublishResultAsync(SceneAnalysisResult message, ILambdaContext context)
+    private async Task PublishResultAsync(SceneAnalysisResult message)
     {
         var body = JsonSerializer.Serialize(message);
         await sqsClient.SendMessageAsync(new SendMessageRequest
@@ -133,6 +146,6 @@ public sealed class Function
             MessageBody = body
         });
 
-        context.Logger.LogInformation($"Published analysis result to SQS: {body}");
+        Log.PublishedAnalysisResult(logger, body);
     }
 }

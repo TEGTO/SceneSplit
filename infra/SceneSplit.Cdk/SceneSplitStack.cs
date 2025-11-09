@@ -1,13 +1,12 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
+using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.ServiceDiscovery;
 using Amazon.CDK.AWS.SQS;
 using Constructs;
 using SceneSplit.Cdk.Constructs;
-using Cluster = Amazon.CDK.AWS.ECS.Cluster;
-using ClusterProps = Amazon.CDK.AWS.ECS.ClusterProps;
 
 namespace SceneSplit.Cdk;
 
@@ -39,13 +38,38 @@ public class SceneSplitStack : Stack
             Encryption = BucketEncryption.S3_MANAGED
         });
 
-        var sceneImageQueue = new Queue(this, "SceneSplitSceneImagesQueue", new QueueProps
+        var sceneImageDetectedObjectsQueue = new Queue(this, "SceneSplitSceneImagDetectedObjectsQueue", new QueueProps
         {
-            QueueName = "scene-split-scene-images",
+            QueueName = "scene-split-detected-objects",
             VisibilityTimeout = Duration.Seconds(60),
             RetentionPeriod = Duration.Days(1),
             RemovalPolicy = RemovalPolicy.DESTROY
         });
+
+        var detectedObjectImageBucket = new Bucket(this, "DetectedObjectImageBucket", new BucketProps
+        {
+            BucketName = "scene-split-detected-object-images",
+            RemovalPolicy = RemovalPolicy.DESTROY,
+            AutoDeleteObjects = true,
+            BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions
+            {
+                BlockPublicAcls = false,
+                BlockPublicPolicy = false,
+                IgnorePublicAcls = false,
+                RestrictPublicBuckets = false
+            }),
+            PublicReadAccess = false,
+            Versioned = false,
+            Encryption = BucketEncryption.S3_MANAGED
+        });
+
+        detectedObjectImageBucket.AddToResourcePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Sid = "PublicReadGetObject",
+            Actions = ["s3:GetObject"],
+            Principals = [new AnyPrincipal()],
+            Resources = [$"{detectedObjectImageBucket.BucketArn}/*"]
+        }));
 
         var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
 
@@ -56,7 +80,17 @@ public class SceneSplitStack : Stack
             cluster,
             vpc,
             compressionApiUrl,
-            sceneImageBucket
+            sceneImageBucket,
+            detectedObjectImageBucket
+        );
+
+        _ = new ObjectImageSearchLambdaConstruct(
+            this,
+            "ObjectImageSearchLambdaConstruct",
+            vpc,
+            sceneImageDetectedObjectsQueue,
+            detectedObjectImageBucket,
+            compressionApiUrl
         );
 
         _ = new SceneAnalysisLambdaConstruct(
@@ -64,7 +98,7 @@ public class SceneSplitStack : Stack
             "SceneAnalysisLambdaConstruct",
             vpc,
             sceneImageBucket,
-            sceneImageQueue
+            sceneImageDetectedObjectsQueue
        );
 
         var apiEndpoint = $"http://{apiService.FargateService.LoadBalancer.LoadBalancerDnsName}";

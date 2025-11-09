@@ -1,6 +1,7 @@
 ﻿using Amazon.S3;
 using Amazon.S3.Transfer;
 using SceneSplit.Api.Extenstions;
+using SceneSplit.Api.HostedServices;
 using SceneSplit.Api.Hubs;
 using SceneSplit.Api.Services.StorageService;
 using SceneSplit.Configuration;
@@ -32,6 +33,8 @@ builder.Services.AddGrpcClientWeb<Compression.CompressionClient>(compressionApiU
 });
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+builder.Services.AddHostedService<S3ObjectImageWatcher>();
 
 builder.Services.AddSwaggerGen();
 

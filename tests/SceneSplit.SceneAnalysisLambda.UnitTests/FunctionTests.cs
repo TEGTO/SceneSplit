@@ -1,13 +1,15 @@
-﻿using Amazon.Lambda.Core;
-using Amazon.Lambda.S3Events;
+﻿using Amazon.Lambda.S3Events;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Moq;
+using SceneSplit.TestShared;
 using System.Text;
 using System.Text.Json;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using Tag = Amazon.S3.Model.Tag;
 
 namespace SceneSplit.SceneAnalysisLambda.UnitTests;
@@ -18,11 +20,10 @@ public class FunctionTests
     private Mock<IAmazonS3> s3Mock = null!;
     private Mock<IAmazonSQS> sqsMock = null!;
     private Mock<IChatClient> aiMock = null!;
-    private Mock<ILambdaContext> contextMock = null!;
+    private Mock<ILogger<Function>> loggerMock = null!;
 
     private SceneAnalysisLambdaOptions options = null!;
     private Function function = null!;
-    private LambdaLoggerMock loggerMock = null!;
 
     [SetUp]
     public void Setup()
@@ -37,15 +38,14 @@ public class FunctionTests
             SqsQueueUrl = "https://queue-url"
         };
 
-        loggerMock = new LambdaLoggerMock();
-        contextMock = new Mock<ILambdaContext>();
-        contextMock.Setup(c => c.Logger).Returns(loggerMock);
+        loggerMock = TestHelper.CreateLoggerMock<Function>();
 
         function = new Function(
             s3Mock.Object,
             sqsMock.Object,
             aiMock.Object,
-            options
+            options,
+            loggerMock.Object
         );
     }
 
@@ -96,11 +96,15 @@ public class FunctionTests
             ]
         };
 
-        await function.Handler(s3Event, contextMock.Object);
+        await function.Handler(s3Event);
 
         sqsMock.Verify(s => s.SendMessageAsync(
             It.Is<SendMessageRequest>(req => req.QueueUrl == options.SqsQueueUrl && req.MessageBody.Contains("item1")),
             It.IsAny<CancellationToken>()), Times.Once);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.PublishedAnalysisResult));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Never(), nameof(Log.NoItemsDetected));
     }
 
     [Test]
@@ -136,11 +140,15 @@ public class FunctionTests
             ]
         };
 
-        await function.Handler(s3Event, contextMock.Object);
+        await function.Handler(s3Event);
 
         sqsMock.Verify(s => s.SendMessageAsync(
             It.Is<SendMessageRequest>(req => req.MessageBody.Contains("\"UserId\":\"unknown\"")),
             It.IsAny<CancellationToken>()), Times.Once);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.PublishedAnalysisResult));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Never(), nameof(Log.NoItemsDetected));
     }
 
     [Test]
@@ -173,14 +181,62 @@ public class FunctionTests
             ]
         };
 
-        await function.Handler(s3Event, contextMock.Object);
+        await function.Handler(s3Event);
 
         sqsMock.Verify(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-}
 
-public class LambdaLoggerMock : ILambdaLogger
-{
-    public void Log(string message) { }
-    public void LogLine(string message) { }
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Warning, Times.Once(), nameof(Log.NoItemsDetected));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Never(), nameof(Log.PublishedAnalysisResult));
+    }
+
+    [Test]
+    public void Handler_SqsSendMessageThrows_CaughtAndLogged()
+    {
+        var bucket = "bucket";
+        var key = "key.jpg";
+
+        s3Mock.Setup(s => s.GetObjectTaggingAsync(It.IsAny<GetObjectTaggingRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetObjectTaggingResponse { Tagging = [new Tag { Key = "UserId", Value = "123" }] });
+
+        s3Mock.Setup(s => s.GetObjectAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GetObjectResponse { ResponseStream = new MemoryStream(Encoding.UTF8.GetBytes("image bytes")) });
+
+        aiMock.Setup(ai => ai.GetResponseAsync(
+                It.IsAny<IEnumerable<ChatMessage>>(),
+                It.IsAny<ChatOptions?>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IEnumerable<ChatMessage> messages, ChatOptions? _, CancellationToken __) =>
+            {
+                var response = new SceneAnalysisAIResponse { Items = ["item1", "item2"] };
+                var assistantMessage = new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(response));
+                return new ChatResponse<SceneAnalysisAIResponse>(new ChatResponse(assistantMessage), new JsonSerializerOptions());
+            });
+
+        sqsMock.Setup(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new Exception("SQS failure"));
+
+        var s3Event = new S3Event
+        {
+            Records =
+            [
+                new()
+                {
+                    S3 = new S3Event.S3Entity
+                    {
+                        Bucket = new S3Event.S3BucketEntity { Name = bucket },
+                        Object = new S3Event.S3ObjectEntity { Key = key }
+                    }
+                }
+            ]
+        };
+
+        Assert.ThrowsAsync<Exception>(async () => await function.Handler(s3Event));
+
+        sqsMock.Verify(s => s.SendMessageAsync(It.IsAny<SendMessageRequest>(), It.IsAny<CancellationToken>()), Times.Once);
+
+        loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.ProcessingS3Object));
+        loggerMock.VerifyLog(LogLevel.Error, Times.Once(), nameof(Log.FailedToProcessImage));
+        loggerMock.VerifyLog(LogLevel.Information, Times.Never(), nameof(Log.PublishedAnalysisResult));
+    }
 }
