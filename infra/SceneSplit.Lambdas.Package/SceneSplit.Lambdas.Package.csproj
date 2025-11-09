@@ -12,6 +12,11 @@
 		  Command='dotnet lambda package --configuration $(Configuration) --framework $(Framework) --verbose --output-package "$(PublishDir)\SceneSplit.SceneAnalysisLambda.zip"'
 		  WorkingDirectory='..\..\src\SceneSplit.Backend\SceneSplit.SceneAnalysisLambda'
 		  ConsoleToMSBuild='true' />
+		
+		<Exec
+		  Command='dotnet lambda package --configuration $(Configuration) --framework $(Framework) --verbose --output-package "$(PublishDir)\SceneSplit.ObjectImageSearchLambda.zip"'
+		  WorkingDirectory='..\..\src\SceneSplit.Backend\SceneSplit.ObjectImageSearchLambda'
+		  ConsoleToMSBuild='true' />
 
 	</Target>
 

@@ -47,6 +47,16 @@ public class SceneSplitStack : Stack
             RemovalPolicy = RemovalPolicy.DESTROY
         });
 
+        var detectedObjectImageBucket = new Bucket(this, "DetectedObjectImageBucket", new BucketProps
+        {
+            BucketName = "scene-split-detected-object-images",
+            RemovalPolicy = RemovalPolicy.DESTROY,
+            AutoDeleteObjects = true,
+            BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
+            Versioned = false,
+            Encryption = BucketEncryption.S3_MANAGED
+        });
+
         var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
 
         var compressionApiUrl = $"http://{compressionApiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
@@ -57,6 +67,15 @@ public class SceneSplitStack : Stack
             vpc,
             compressionApiUrl,
             sceneImageBucket
+        );
+
+        _ = new ObjectImageSearchLambdaConstruct(
+            this,
+            "ObjectImageSearchLambdaConstruct",
+            vpc,
+            sceneImageDetectedObjectsQueue,
+            detectedObjectImageBucket,
+            compressionApiUrl
         );
 
         _ = new SceneAnalysisLambdaConstruct(
