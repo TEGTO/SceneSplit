@@ -76,7 +76,7 @@ public class FunctionTests
             It.IsAny<CancellationToken>()))
             .ReturnsAsync((IEnumerable<ChatMessage> messages, ChatOptions? options, CancellationToken ct) =>
             {
-                var response = new SceneAnalysisAIResponse { ObjectDescriptions = ["item1", "item2"] };
+                var response = new SceneAnalysisAIResponse { Items = ["item1", "item2"] };
                 var assistantMessage = new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(response));
                 return new ChatResponse<SceneAnalysisAIResponse>(new ChatResponse(assistantMessage), new JsonSerializerOptions());
             });
@@ -122,7 +122,7 @@ public class FunctionTests
         aiMock.Setup(ai => ai.GetResponseAsync(
             It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ChatResponse<SceneAnalysisAIResponse>(
-                new ChatResponse(new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(new SceneAnalysisAIResponse { ObjectDescriptions = ["item1"] }))),
+                new ChatResponse(new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(new SceneAnalysisAIResponse { Items = ["item1"] }))),
                 new JsonSerializerOptions()));
 
         var s3Event = new S3Event
@@ -163,7 +163,7 @@ public class FunctionTests
         aiMock.Setup(ai => ai.GetResponseAsync(
             It.IsAny<IEnumerable<ChatMessage>>(), It.IsAny<ChatOptions>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ChatResponse<SceneAnalysisAIResponse>(
-                new ChatResponse(new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(new SceneAnalysisAIResponse { ObjectDescriptions = [] }))),
+                new ChatResponse(new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(new SceneAnalysisAIResponse { Items = [] }))),
                 new JsonSerializerOptions()));
 
         var s3Event = new S3Event
@@ -208,7 +208,7 @@ public class FunctionTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync((IEnumerable<ChatMessage> messages, ChatOptions? _, CancellationToken __) =>
             {
-                var response = new SceneAnalysisAIResponse { ObjectDescriptions = ["item1", "item2"] };
+                var response = new SceneAnalysisAIResponse { Items = ["item1", "item2"] };
                 var assistantMessage = new ChatMessage(ChatRole.Assistant, JsonSerializer.Serialize(response));
                 return new ChatResponse<SceneAnalysisAIResponse>(new ChatResponse(assistantMessage), new JsonSerializerOptions());
             });

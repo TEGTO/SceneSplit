@@ -130,6 +130,7 @@ public class S3ObjectImageWatcherTests
 
         // Act
         await InvokeExecuteAsync(cts.Token);
+        await Task.Delay(200);
 
         // Assert
         loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.S3ObjectImageWatcherStarting));
@@ -163,6 +164,7 @@ public class S3ObjectImageWatcherTests
 
         // Act
         await InvokeExecuteAsync(cts.Token);
+        await Task.Delay(200);
 
         // Assert
         loggerMock.VerifyLog(LogLevel.Information, Times.AtLeastOnce(), nameof(Log.S3ObjectImageWatcherStarting));
@@ -186,6 +188,7 @@ public class S3ObjectImageWatcherTests
 
         // Act
         await InvokeExecuteAsync(cts.Token);
+        await Task.Delay(200);
 
         // Assert
         loggerMock.VerifyLog(LogLevel.Information, Times.Once(), nameof(Log.S3ObjectImageWatcherStarting));

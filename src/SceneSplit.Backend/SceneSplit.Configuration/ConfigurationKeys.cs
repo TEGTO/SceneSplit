@@ -21,7 +21,7 @@ public static class WorkflowTags
     public const string DESCRIPTION = "Description";
 
     public const string UNKNOWN = "unknown";
-    public static readonly IEnumerable<string> ALL_TAGS = [USER_ID_TAG, WORKFLOW_ID, DESCRIPTION];
+    public static readonly IEnumerable<string> ALL_TAGS = [USER_ID_TAG, WORKFLOW_ID];
 }
 
 public static class ImageCompressionApiConfigurationKeys

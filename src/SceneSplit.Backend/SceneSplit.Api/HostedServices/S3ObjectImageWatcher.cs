@@ -149,6 +149,11 @@ public class S3ObjectImageWatcher : BackgroundService
 
             var listResp = await s3.ListObjectsV2Async(listReq, ct);
 
+            if (listResp == null || listResp.S3Objects == null || listResp.S3Objects.Count == 0)
+            {
+                break;
+            }
+
             foreach (var key in listResp.S3Objects.Select(obj => obj.Key))
             {
                 if (!knownKeys.Add(key))

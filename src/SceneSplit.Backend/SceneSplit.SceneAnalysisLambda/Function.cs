@@ -126,14 +126,14 @@ public sealed class Function
             Analyze the image and return up to {{options.MaxItems}} items as a JSON array of strings.
             Use the following format:
             {
-                "objectDescriptions": ["object1", "object2", "object3"]
+                "items": ["item1", "item2", "item3"]
             }
             """);
 
         message.Contents.Add(new DataContent(imageBytes, mimeType));
 
         var response = await aiClient.GetResponseAsync<SceneAnalysisAIResponse>(message);
-        return response.Result.ObjectDescriptions ?? [];
+        return response.Result.Items ?? [];
     }
 
     private async Task PublishResultAsync(SceneAnalysisResult message)

@@ -1,6 +1,7 @@
 ﻿using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
+using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using Microsoft.Extensions.Logging;
 using SceneSplit.Configuration;
@@ -99,7 +100,7 @@ public sealed class Function
                     }
 
                     var tags = sceneAnalysis.WorkflowTags;
-                    tags.Add(WorkflowTags.DESCRIPTION, objectDescription);
+                    tags[WorkflowTags.DESCRIPTION] = objectDescription;
 
                     foreach (var imageUrl in imageUrls)
                     {
@@ -203,10 +204,7 @@ public sealed class Function
             ContentType = $"image/{response.Format}"
         };
 
-        foreach (var kvp in workflowTags)
-        {
-            uploadRequest.Metadata[kvp.Key] = kvp.Value;
-        }
+        uploadRequest.TagSet = [.. workflowTags.Select(kvp => new Tag { Key = kvp.Key, Value = kvp.Value })];
 
         await transferUtility.UploadAsync(uploadRequest);
         Log.UploadedToBucket(logger, fileName, options.BucketName);
