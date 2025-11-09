@@ -7,6 +7,8 @@ public static class ApiConfigurationKeys
     public static string MAX_IMAGE_SIZE { get; } = nameof(MAX_IMAGE_SIZE);
     public static string COMPRESSION_API_URL { get; } = nameof(COMPRESSION_API_URL);
     public static string SCENE_IMAGE_BUCKET { get; } = nameof(SCENE_IMAGE_BUCKET);
+    public static string OBJECT_IMAGE_BUCKET { get; } = nameof(OBJECT_IMAGE_BUCKET);
+    public static string OBJECT_IMAGE_POLL_INTERVAL_SECONDS { get; } = nameof(OBJECT_IMAGE_POLL_INTERVAL_SECONDS);
     public static string IMAGE_QUALITY_COMPRESSION { get; } = nameof(IMAGE_QUALITY_COMPRESSION);
     public static string RESIZE_WIDTH { get; } = nameof(RESIZE_WIDTH);
     public static string RESIZE_HEIGHT { get; } = nameof(RESIZE_HEIGHT);
@@ -16,9 +18,10 @@ public static class WorkflowTags
 {
     public const string USER_ID_TAG = "UserId";
     public const string WORKFLOW_ID = "WorkflowId";
+    public const string DESCRIPTION = "Description";
 
     public const string UNKNOWN = "unknown";
-    public static readonly IEnumerable<string> ALL_TAGS = [USER_ID_TAG, WORKFLOW_ID];
+    public static readonly IEnumerable<string> ALL_TAGS = [USER_ID_TAG, WORKFLOW_ID, DESCRIPTION];
 }
 
 public static class ImageCompressionApiConfigurationKeys

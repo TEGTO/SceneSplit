@@ -6,7 +6,7 @@ using Polly.Retry;
 
 namespace SceneSplit.GrpcClientShared.Interceptors;
 
-public class GrpcResilienceInterceptor(ILogger logger) : Interceptor
+public class GrpcResilienceInterceptor(ILogger<GrpcResilienceInterceptor> logger) : Interceptor
 {
     private readonly AsyncRetryPolicy retryPolicy = Policy
         .Handle<RpcException>(ex =>

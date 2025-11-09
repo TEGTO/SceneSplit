@@ -63,7 +63,7 @@ public class FunctionTests
         var message = new SceneAnalysisResult
         {
             WorkflowTags = [],
-            Items = ["cat"]
+            ObjectDescriptions = ["cat"]
         };
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
@@ -132,7 +132,7 @@ public class FunctionTests
         var message = new SceneAnalysisResult
         {
             WorkflowTags = new Dictionary<string, string>(),
-            Items = ["dog"]
+            ObjectDescriptions = ["dog"]
         };
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
@@ -203,7 +203,7 @@ public class FunctionTests
         var message = new SceneAnalysisResult
         {
             WorkflowTags = new Dictionary<string, string> { ["UserId"] = "u1" },
-            Items = ["mountain"]
+            ObjectDescriptions = ["mountain"]
         };
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
@@ -286,7 +286,7 @@ public class FunctionTests
         var message = new SceneAnalysisResult
         {
             WorkflowTags = [],
-            Items = ["forest"]
+            ObjectDescriptions = ["forest"]
         };
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 
@@ -363,7 +363,7 @@ public class FunctionTests
         var message = new SceneAnalysisResult
         {
             WorkflowTags = [],
-            Items = ["anything"]
+            ObjectDescriptions = ["anything"]
         };
         var sqsEvent = CreateSqsEvent(JsonSerializer.Serialize(message));
 

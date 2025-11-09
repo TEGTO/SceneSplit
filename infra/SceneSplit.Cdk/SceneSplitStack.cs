@@ -66,7 +66,8 @@ public class SceneSplitStack : Stack
             cluster,
             vpc,
             compressionApiUrl,
-            sceneImageBucket
+            sceneImageBucket,
+            detectedObjectImageBucket
         );
 
         _ = new ObjectImageSearchLambdaConstruct(

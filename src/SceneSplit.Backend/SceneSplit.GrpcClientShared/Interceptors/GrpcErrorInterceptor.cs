@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace SceneSplit.GrpcClientShared.Interceptors;
 
-public class GrpcErrorInterceptor(ILogger logger) : Interceptor
+public class GrpcErrorInterceptor(ILogger<GrpcErrorInterceptor> logger) : Interceptor
 {
     public override AsyncUnaryCall<TResponse> AsyncUnaryCall<TRequest, TResponse>(
         TRequest request,

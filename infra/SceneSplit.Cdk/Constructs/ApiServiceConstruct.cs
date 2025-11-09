@@ -14,7 +14,14 @@ public class ApiServiceConstruct : Construct
 {
     public ApplicationLoadBalancedFargateService FargateService { get; }
 
-    public ApiServiceConstruct(Construct scope, string id, Cluster cluster, Vpc vpc, string compressionApiUrl, Bucket sceneImageBucket)
+    public ApiServiceConstruct(
+        Construct scope,
+        string id,
+        Cluster cluster,
+        Vpc vpc,
+        string compressionApiUrl,
+        Bucket sceneImageBucket,
+        Bucket objectImageBucket)
         : base(scope, id)
     {
         var secGroup = new SecurityGroup(this, "ApiServiceSecurityGroup", new SecurityGroupProps
@@ -45,6 +52,8 @@ public class ApiServiceConstruct : Construct
                     { ApiConfigurationKeys.ALLOWED_IMAGE_TYPES, ".jpg,.jpeg,.png" },
                     { ApiConfigurationKeys.COMPRESSION_API_URL, compressionApiUrl },
                     { ApiConfigurationKeys.SCENE_IMAGE_BUCKET, sceneImageBucket.BucketName },
+                    { ApiConfigurationKeys.OBJECT_IMAGE_BUCKET, objectImageBucket.BucketName },
+                    { ApiConfigurationKeys.OBJECT_IMAGE_POLL_INTERVAL_SECONDS, "10" },
                 },
                 LogDriver = LogDriver.AwsLogs(new AwsLogDriverProps
                 {
@@ -72,5 +81,6 @@ public class ApiServiceConstruct : Construct
         });
 
         sceneImageBucket.GrantReadWrite(FargateService.TaskDefinition.TaskRole);
+        objectImageBucket.GrantRead(FargateService.TaskDefinition.TaskRole);
     }
 }

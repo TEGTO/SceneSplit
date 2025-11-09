@@ -3,7 +3,9 @@ using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using Microsoft.Extensions.Logging;
+using SceneSplit.Configuration;
 using SceneSplit.GrpcClientShared.Helpers;
+using SceneSplit.GrpcClientShared.Interceptors;
 using SceneSplit.ImageCompression.Sdk;
 using SceneSplit.SceneAnalysisLambda.Sdk;
 using System.Text.Json;
@@ -29,6 +31,8 @@ public sealed class Function
     {
         var loggerFactory = LoggerFactory.Create(builder => builder.AddLambdaLogger());
         logger = loggerFactory.CreateLogger<Function>();
+        var errorLogger = loggerFactory.CreateLogger<GrpcErrorInterceptor>();
+        var resilienceLogger = loggerFactory.CreateLogger<GrpcResilienceInterceptor>();
 
         transferUtility = new TransferUtility(new AmazonS3Client());
         options = ObjectImageSearchLambdaOptions.FromEnvironment();
@@ -36,7 +40,8 @@ public sealed class Function
 
         compressionClient = GrpcClientFactoryHelper.CreateGrpcClientWeb<Compression.CompressionClient>(
             uri: options.CompressionApiUrl,
-            logger: logger,
+            errorLogger: errorLogger,
+            resilienceLogger: resilienceLogger,
             configureChannelOptions: channelOptions =>
             {
                 channelOptions.MaxReceiveMessageSize = options.MaxImageSize;
@@ -82,20 +87,23 @@ public sealed class Function
 
             try
             {
-                foreach (var item in sceneAnalysis.Items)
+                foreach (var objectDescription in sceneAnalysis.ObjectDescriptions)
                 {
-                    Log.SearchingImages(logger, item);
+                    Log.SearchingImages(logger, objectDescription);
 
-                    var imageUrls = await SearchImagesAsync(item);
+                    var imageUrls = await SearchImagesAsync(objectDescription);
                     if (imageUrls.Count == 0)
                     {
-                        Log.NoImagesFound(logger, item);
+                        Log.NoImagesFound(logger, objectDescription);
                         continue;
                     }
 
+                    var tags = sceneAnalysis.WorkflowTags;
+                    tags.Add(WorkflowTags.DESCRIPTION, objectDescription);
+
                     foreach (var imageUrl in imageUrls)
                     {
-                        await UploadImageToS3Async(imageUrl, sceneAnalysis.WorkflowTags);
+                        await UploadImageToS3Async(imageUrl, tags);
                     }
                 }
             }

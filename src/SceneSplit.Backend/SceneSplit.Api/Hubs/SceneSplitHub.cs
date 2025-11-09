@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using SceneSplit.Api.Commands.ProcessSceneImage;
-using SceneSplit.Api.Commands.UpdateObjectImages;
 using SceneSplit.Api.Domain.Models;
 using SceneSplit.Api.Queries.GetObjectImages;
 using SceneSplit.Api.Sdk.Contracts;
@@ -47,15 +46,20 @@ public class SceneSplitHub(IMediator mediator) : Hub<ISceneSplitHubClient>
         await base.OnDisconnectedAsync(exception);
     }
 
-    public async Task UpdateImagesForUser(string userId, ICollection<ObjectImage> images)
+    public static async Task UpdateUserImagesAsync(
+        string userId,
+        IHubClients<ISceneSplitHubClient> clients,
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        await mediator.Send(new UpdateObjectImagesCommand(userId, images));
-
-        if (connectionToUser.Values.Contains(userId))
+        if (!connectionToUser.Values.Contains(userId))
         {
-            userObjectImages[userId] = images;
-            await Clients.Group(userId).ReceiveImageLinks(images.Adapt<ICollection<ObjectImageResponse>>());
+            return;
         }
+
+        var images = await mediator.Send(new GetObjectImagesQuery(userId), cancellationToken);
+        userObjectImages[userId] = images;
+        await clients.Group(userId).ReceiveImageLinks(images.Adapt<ICollection<ObjectImageResponse>>());
     }
 
     public async Task UploadSceneImageForUser(string userId, SendSceneImageRequest request)

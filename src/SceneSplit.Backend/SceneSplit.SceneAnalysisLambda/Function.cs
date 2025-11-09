@@ -63,9 +63,9 @@ public sealed class Function
                 var workflowTags = await GetWorkflowTagsAsync(bucket, key);
 
                 var (imageBytes, mimeType) = await DownloadImageAsync(bucket, key);
-                var items = await AnalyzeImageAsync(imageBytes, mimeType);
+                var objectDescriptions = await AnalyzeImageAsync(imageBytes, mimeType);
 
-                if (items.Count == 0)
+                if (objectDescriptions.Count == 0)
                 {
                     Log.NoItemsDetected(logger, key);
                     continue;
@@ -74,7 +74,7 @@ public sealed class Function
                 var message = new SceneAnalysisResult
                 {
                     WorkflowTags = workflowTags,
-                    Items = items
+                    ObjectDescriptions = objectDescriptions
                 };
 
                 await PublishResultAsync(message);
@@ -126,14 +126,14 @@ public sealed class Function
             Analyze the image and return up to {{options.MaxItems}} items as a JSON array of strings.
             Use the following format:
             {
-                "items": ["item1", "item2", "item3"]
+                "objectDescriptions": ["object1", "object2", "object3"]
             }
             """);
 
         message.Contents.Add(new DataContent(imageBytes, mimeType));
 
         var response = await aiClient.GetResponseAsync<SceneAnalysisAIResponse>(message);
-        return response.Result.Items ?? [];
+        return response.Result.ObjectDescriptions ?? [];
     }
 
     private async Task PublishResultAsync(SceneAnalysisResult message)

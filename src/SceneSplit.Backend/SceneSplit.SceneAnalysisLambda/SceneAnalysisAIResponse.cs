@@ -2,5 +2,5 @@
 
 public class SceneAnalysisAIResponse
 {
-    public List<string> Items { get; set; } = [];
+    public List<string> ObjectDescriptions { get; set; } = [];
 }

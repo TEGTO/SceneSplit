@@ -15,7 +15,8 @@ public static class GrpcClientFactoryHelper
 {
     public static TClient CreateGrpcClientWeb<TClient>(
         string uri,
-        ILogger logger,
+        ILogger<GrpcErrorInterceptor> errorLogger,
+        ILogger<GrpcResilienceInterceptor> resilienceLogger,
         Action<HttpStandardResilienceOptions>? configureHttpResilienceOptions = null,
         Action<GrpcChannelOptions>? configureChannelOptions = null)
         where TClient : class
@@ -46,8 +47,8 @@ public static class GrpcClientFactoryHelper
         var channel = GrpcChannel.ForAddress(uri, channelOptions);
 
         var callInvoker = channel.Intercept(
-            new GrpcResilienceInterceptor(logger),
-            new GrpcErrorInterceptor(logger)
+            new GrpcResilienceInterceptor(resilienceLogger),
+            new GrpcErrorInterceptor(errorLogger)
         );
 
         var interceptedClient = (TClient)Activator.CreateInstance(typeof(TClient), callInvoker)!;
