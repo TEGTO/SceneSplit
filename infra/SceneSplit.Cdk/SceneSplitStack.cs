@@ -1,13 +1,12 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
+using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.S3;
 using Amazon.CDK.AWS.ServiceDiscovery;
 using Amazon.CDK.AWS.SQS;
 using Constructs;
 using SceneSplit.Cdk.Constructs;
-using Cluster = Amazon.CDK.AWS.ECS.Cluster;
-using ClusterProps = Amazon.CDK.AWS.ECS.ClusterProps;
 
 namespace SceneSplit.Cdk;
 
@@ -52,10 +51,25 @@ public class SceneSplitStack : Stack
             BucketName = "scene-split-detected-object-images",
             RemovalPolicy = RemovalPolicy.DESTROY,
             AutoDeleteObjects = true,
-            BlockPublicAccess = BlockPublicAccess.BLOCK_ALL,
+            BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions
+            {
+                BlockPublicAcls = false,
+                BlockPublicPolicy = false,
+                IgnorePublicAcls = false,
+                RestrictPublicBuckets = false
+            }),
+            PublicReadAccess = false,
             Versioned = false,
             Encryption = BucketEncryption.S3_MANAGED
         });
+
+        detectedObjectImageBucket.AddToResourcePolicy(new PolicyStatement(new PolicyStatementProps
+        {
+            Sid = "PublicReadGetObject",
+            Actions = ["s3:GetObject"],
+            Principals = [new AnyPrincipal()],
+            Resources = [$"{detectedObjectImageBucket.BucketArn}/*"]
+        }));
 
         var compressionApiService = new CompressionApiServiceConstruct(this, "CompressionApiServiceConstruct", cluster, vpc);
 

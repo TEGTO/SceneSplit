@@ -37,7 +37,7 @@ public class S3ObjectImageWatcher : BackgroundService
         bucketName = configuration[ApiConfigurationKeys.OBJECT_IMAGE_BUCKET]
             ?? throw new InvalidOperationException($"{ApiConfigurationKeys.OBJECT_IMAGE_BUCKET} missing");
 
-        pollSeconds = configuration.GetValue<int?>(ApiConfigurationKeys.OBJECT_IMAGE_POLL_INTERVAL_SECONDS) ?? 10;
+        pollSeconds = int.Parse(configuration[ApiConfigurationKeys.OBJECT_IMAGE_POLL_INTERVAL_SECONDS] ?? "10");
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
