@@ -48,3 +48,9 @@ public static class ObjectImageSearchLambdaConfigurationKeys
     public static string RESIZE_HEIGHT { get; } = nameof(RESIZE_HEIGHT);
     public static string IMAGE_QUALITY_COMPRESSION { get; } = nameof(IMAGE_QUALITY_COMPRESSION);
 }
+
+public static class ObjectImageCleanerLambdaConfigurationKeys
+{
+    public static string MAX_KEYS_SEARCH_CONCURENCY { get; } = nameof(MAX_KEYS_SEARCH_CONCURENCY);
+    public static string MAX_DELETE_BRANCH { get; } = nameof(MAX_DELETE_BRANCH);
+}

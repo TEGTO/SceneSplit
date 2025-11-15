@@ -99,7 +99,14 @@ public class SceneSplitStack : Stack
             vpc,
             sceneImageBucket,
             sceneImageDetectedObjectsQueue
-       );
+        );
+
+        _ = new ObjectImageCleanerLambdaConstruct(
+            this,
+            "ObjectImageCleanerLambdaConstruct",
+            vpc,
+            detectedObjectImageBucket
+        );
 
         var apiEndpoint = $"http://{apiService.FargateService.LoadBalancer.LoadBalancerDnsName}";
         _ = new FrontendServiceConstruct(this, "FrontendServiceConstruct", cluster, vpc, apiEndpoint);
