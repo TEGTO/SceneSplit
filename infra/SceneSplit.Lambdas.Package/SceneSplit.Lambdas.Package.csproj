@@ -18,6 +18,11 @@
 		  WorkingDirectory='..\..\src\SceneSplit.Backend\SceneSplit.ObjectImageSearchLambda'
 		  ConsoleToMSBuild='true' />
 
+		<Exec
+		  Command='dotnet lambda package --configuration $(Configuration) --framework $(Framework) --verbose --output-package "$(PublishDir)\SceneSplit.ObjectImageCleanerLambda.zip"'
+		  WorkingDirectory='..\..\src\SceneSplit.Backend\SceneSplit.ObjectImageCleanerLambda'
+		  ConsoleToMSBuild='true' />
+
 	</Target>
 
 </Project>

@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<RestorePackages>true</RestorePackages>
+		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<AWSProjectType>Lambda</AWSProjectType>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Logging" />
+		<PackageReference Include="Amazon.Lambda.Logging.AspNetCore" />
+		<PackageReference Include="Amazon.Lambda.Core" />
+		<PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
+		<PackageReference Include="Amazon.Lambda.S3Events" />
+		<PackageReference Include="AWSSDK.S3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="SceneSplit.ObjectImageCleanerLambda.UnitTests" />
+	</ItemGroup>
+</Project>
