@@ -1,4 +1,4 @@
-﻿using Amazon.S3;
+using Amazon.S3;
 using Amazon.S3.Transfer;
 using SceneSplit.Api.Extenstions;
 using SceneSplit.Api.HostedServices;
@@ -9,6 +9,8 @@ using SceneSplit.GrpcClientShared.Extenstions;
 using SceneSplit.ImageCompression.Sdk;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -50,21 +52,22 @@ builder.Services.AddSingleton<IStorageService, S3StorageService>();
 
 var app = builder.Build();
 
+app.MapDefaultEndpoints();
+
+app.UsePathBase("/api");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseAuthorization();
-
 app.UseCors(myAllowSpecificOrigins);
+
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<SceneSplitHub>("/hubs/scene-split");
-
 app.MapHealthChecks("/health");
-
-app.UsePathBase("/api");
 
 await app.RunAsync();
