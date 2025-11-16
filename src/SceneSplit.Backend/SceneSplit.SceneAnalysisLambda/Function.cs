@@ -23,14 +23,14 @@ public sealed class Function
     private readonly SceneAnalysisLambdaOptions options;
     private readonly ILogger<Function> logger;
 
-    public Function()
+    public Function(ILambdaContext context)
     {
         var loggerFactory = LoggerFactory.Create(builder => builder.AddLambdaLogger());
         logger = loggerFactory.CreateLogger<Function>();
 
         s3Client = new AmazonS3Client();
         sqsClient = new AmazonSQSClient();
-        options = SceneAnalysisLambdaOptions.FromEnvironment();
+        options = SceneAnalysisLambdaOptions.FromEnvironment(context);
         aiClient = new AmazonBedrockRuntimeClient().AsIChatClient(options.BedrockModelId);
     }
 

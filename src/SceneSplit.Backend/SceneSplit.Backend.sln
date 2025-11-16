@@ -72,6 +72,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.Backend.ServiceD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{47544605-0131-4F0F-ACDE-846F025EFF16}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SceneSplit.LambdaShared", "SceneSplit.LambdaShared\SceneSplit.LambdaShared.csproj", "{007BFDB4-8302-452D-B9F3-58CD9D1D5BF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -158,6 +160,10 @@ Global
 		{A58E8698-E1BE-37A5-7F6A-DE634FA921F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A58E8698-E1BE-37A5-7F6A-DE634FA921F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A58E8698-E1BE-37A5-7F6A-DE634FA921F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{007BFDB4-8302-452D-B9F3-58CD9D1D5BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{007BFDB4-8302-452D-B9F3-58CD9D1D5BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{007BFDB4-8302-452D-B9F3-58CD9D1D5BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{007BFDB4-8302-452D-B9F3-58CD9D1D5BF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -188,6 +194,7 @@ Global
 		{A4E94157-B1EF-4DE4-927A-5A76E96C706E} = {47544605-0131-4F0F-ACDE-846F025EFF16}
 		{A58E8698-E1BE-37A5-7F6A-DE634FA921F6} = {47544605-0131-4F0F-ACDE-846F025EFF16}
 		{47544605-0131-4F0F-ACDE-846F025EFF16} = {F9804709-4F1A-4666-A5F8-FE762AFAFA81}
+		{007BFDB4-8302-452D-B9F3-58CD9D1D5BF0} = {A4538C4A-5DF3-4B30-B1A8-1AE424B81A0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EEF3F48B-173E-4436-9539-B95BA6E6C5EA}

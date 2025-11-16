@@ -11,6 +11,12 @@
         "MAX_ITEMS": "5",
         "BEDROCK_MODEL_ID": ""
       }
+    },
+    "Aspire_scene-split-scene-analysis-lambda": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./SceneSplit.SceneAnalysisLambda.deps.json --runtimeconfig ./SceneSplit.SceneAnalysisLambda.runtimeconfig.json %USERPROFILE%\\.dotnet\\tools\\.store\\amazon.lambda.testtool\\0.11.0\\amazon.lambda.testtool\\0.11.0\\content\\Amazon.Lambda.RuntimeSupport\\net8.0\\Amazon.Lambda.RuntimeSupport.dll SceneSplit.SceneAnalysisLambda::SceneSplit.SceneAnalysisLambda.Function::Handler",
+      "workingDirectory": ".\\bin\\$(Configuration)\\net8.0"
     }
   }
 }

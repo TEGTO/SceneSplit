@@ -1,0 +1,20 @@
+{
+  "Records": [
+    {
+      "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
+      "receiptHandle": "MessageReceiptHandle",
+      "body": "{\"WorkflowTags\":{\"UserId\":\"78d51914-a552-402d-993c-40c2d25ff99b\",\"WorkflowId\":\"12bd8b02-ed5e-4b49-ab84-61dfac2bf73d\"},\"Items\":[\"armor\",\"helmet\",\"gun\",\"fire\",\"sparks\",\"dust\",\"glow\",\"smoke\",\"explosion\",\"background\"]}",
+      "attributes": {
+        "ApproximateReceiveCount": "1",
+        "SentTimestamp": "1523232000000",
+        "SenderId": "123456789012",
+        "ApproximateFirstReceiveTimestamp": "1523232000001"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "7b270e59b47ff90a553787216d55d91d",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:{partition}:sqs:{region}:123456789012:MyQueue",
+      "awsRegion": "{region}"
+    }
+  ]
+}

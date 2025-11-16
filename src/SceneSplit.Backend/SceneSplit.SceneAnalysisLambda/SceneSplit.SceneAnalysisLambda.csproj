@@ -23,6 +23,7 @@
 	
   <ItemGroup>
     <ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
+    <ProjectReference Include="..\SceneSplit.LambdaShared\SceneSplit.LambdaShared.csproj" />
     <ProjectReference Include="..\SceneSplit.SceneAnalysisLambda.Sdk\SceneSplit.SceneAnalysisLambda.Sdk.csproj" />
   </ItemGroup>
 

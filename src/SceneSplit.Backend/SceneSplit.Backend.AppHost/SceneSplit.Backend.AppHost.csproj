@@ -14,7 +14,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SceneSplit.Api\SceneSplit.Api.csproj" />
+    <ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
     <ProjectReference Include="..\SceneSplit.ImageCompression.Api\SceneSplit.ImageCompression.Api.csproj" />
+    <ProjectReference Include="..\SceneSplit.ObjectImageCleanerLambda\SceneSplit.ObjectImageCleanerLambda.csproj" />
+    <ProjectReference Include="..\SceneSplit.ObjectImageSearchLambda\SceneSplit.ObjectImageSearchLambda.csproj" />
+    <ProjectReference Include="..\SceneSplit.SceneAnalysisLambda\SceneSplit.SceneAnalysisLambda.csproj" />
   </ItemGroup>
 
 </Project>
