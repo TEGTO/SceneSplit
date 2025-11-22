@@ -84,6 +84,14 @@ public class SceneSplitStack : Stack
             detectedObjectImageBucket
         );
 
+        _ = new SceneAnalysisLambdaConstruct(
+            this,
+            "SceneAnalysisLambdaConstruct",
+            vpc,
+            sceneImageBucket,
+            sceneImageDetectedObjectsQueue
+        );
+
         _ = new ObjectImageSearchLambdaConstruct(
             this,
             "ObjectImageSearchLambdaConstruct",
@@ -91,14 +99,6 @@ public class SceneSplitStack : Stack
             sceneImageDetectedObjectsQueue,
             detectedObjectImageBucket,
             compressionApiUrl
-        );
-
-        _ = new SceneAnalysisLambdaConstruct(
-            this,
-            "SceneAnalysisLambdaConstruct",
-            vpc,
-            sceneImageBucket,
-            sceneImageDetectedObjectsQueue
         );
 
         _ = new ObjectImageCleanerLambdaConstruct(

@@ -29,9 +29,6 @@ public class SceneAnalysisLambdaConstruct : Construct
         });
         var failureQueue = new Queue(this, "SceneAnalysisLambdaFailures");
 
-        var account = Stack.Of(this).Account;
-        var region = Stack.Of(this).Region;
-
         LambdaFunction = new Function(this, "SceneAnalysisLambda", new FunctionProps
         {
             FunctionName = "scene-split-scene-analysis-lambda",
@@ -47,7 +44,7 @@ public class SceneAnalysisLambdaConstruct : Construct
                 { "DOTNET_ENVIRONMENT", "Production" },
                 { SceneAnalysisLambdaConfigurationKeys.SQS_QUEUE_URL, outputQueue.QueueUrl },
                 { SceneAnalysisLambdaConfigurationKeys.MAX_ITEMS, "5" },
-                { SceneAnalysisLambdaConfigurationKeys.BEDROCK_MODEL_ID, $"arn:aws:bedrock:{region}:{account}:inference-profile/eu.amazon.nova-lite-v1:0" },
+                { SceneAnalysisLambdaConfigurationKeys.BEDROCK_MODEL, "eu.amazon.nova-lite-v1:0" },
             },
             DeadLetterQueue = failureQueue,
             DeadLetterQueueEnabled = true

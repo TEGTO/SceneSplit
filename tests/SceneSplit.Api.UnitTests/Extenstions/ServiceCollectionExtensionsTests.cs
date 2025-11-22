@@ -50,10 +50,37 @@ internal class ServiceCollectionExtensionsTests
     }
 
     [Test]
+    public void AddApplicationCors_RegistersCorsWithAnyOriginAndHeaderAndMethod()
+    {
+        // Arrange
+        configurationMock.Setup(c => c[ApiConfigurationKeys.ALLOWED_CORS_ORIGINS]).Returns("*");
+
+        services.AddLogging();
+        services.AddRouting();
+
+        // Act
+        services.AddApplicationCors(configurationMock.Object, "TestPolicy", isDevelopment: false);
+
+        var serviceProvider = services.BuildServiceProvider();
+        var corsService = serviceProvider.GetRequiredService<ICorsService>();
+
+        // Assert
+        Assert.That(corsService, Is.Not.Null);
+        Assert.That(services.Any(s => s.ServiceType == typeof(ICorsService)));
+
+        var policyProvider = serviceProvider.GetRequiredService<ICorsPolicyProvider>();
+        var policy = policyProvider.GetPolicyAsync(new DefaultHttpContext(), "TestPolicy").Result;
+
+        Assert.That(policy?.AllowAnyOrigin, Is.True);
+        Assert.That(policy?.AllowAnyHeader, Is.True);
+        Assert.That(policy?.AllowAnyMethod, Is.True);
+    }
+
+    [Test]
     public void AddApplicationCors_DevelopmentMode_AllowsLocalhost()
     {
         // Arrange
-        configurationMock.Setup(c => c[ApiConfigurationKeys.ALLOWED_CORS_ORIGINS]).Returns("http://example.com");
+        configurationMock.Setup(c => c[ApiConfigurationKeys.ALLOWED_CORS_ORIGINS]).Returns("*");
 
         services.AddLogging();
         services.AddRouting();

@@ -16,6 +16,12 @@
         "RESIZE_HEIGHT": "1024",
         "IMAGE_QUALITY_COMPRESSION": "75"
       }
+    },
+    "Aspire_object-image-search-lambda": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "exec --depsfile ./SceneSplit.ObjectImageSearchLambda.deps.json --runtimeconfig ./SceneSplit.ObjectImageSearchLambda.runtimeconfig.json %USERPROFILE%\\.dotnet\\tools\\.store\\amazon.lambda.testtool\\0.11.0\\amazon.lambda.testtool\\0.11.0\\content\\Amazon.Lambda.RuntimeSupport\\net8.0\\Amazon.Lambda.RuntimeSupport.dll SceneSplit.ObjectImageSearchLambda::SceneSplit.ObjectImageSearchLambda.Function::Handler",
+      "workingDirectory": ".\\bin\\$(Configuration)\\net8.0"
     }
   }
 }

@@ -1,7 +1,9 @@
-﻿using SceneSplit.Configuration;
+using SceneSplit.Configuration;
 using SceneSplit.ImageCompression.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 var maxMessageSizeBytes = int.Parse(
     builder.Configuration[ImageCompressionApiConfigurationKeys.MAX_IMAGE_SIZE] ??
@@ -17,6 +19,8 @@ builder.Services.AddGrpc(options =>
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 

@@ -34,7 +34,7 @@ public static class SceneAnalysisLambdaConfigurationKeys
 {
     public static string SQS_QUEUE_URL { get; } = nameof(SQS_QUEUE_URL);
     public static string MAX_ITEMS { get; } = nameof(MAX_ITEMS);
-    public static string BEDROCK_MODEL_ID { get; } = nameof(BEDROCK_MODEL_ID);
+    public static string BEDROCK_MODEL { get; } = nameof(BEDROCK_MODEL);
 }
 
 public static class ObjectImageSearchLambdaConfigurationKeys

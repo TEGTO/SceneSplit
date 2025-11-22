@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.0" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>ba7b99fc-592d-4d3d-8170-e529728e0140</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.AWS" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SceneSplit.Api\SceneSplit.Api.csproj" />
+    <ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
+    <ProjectReference Include="..\SceneSplit.ImageCompression.Api\SceneSplit.ImageCompression.Api.csproj" />
+    <ProjectReference Include="..\SceneSplit.ObjectImageCleanerLambda\SceneSplit.ObjectImageCleanerLambda.csproj" />
+    <ProjectReference Include="..\SceneSplit.ObjectImageSearchLambda\SceneSplit.ObjectImageSearchLambda.csproj" />
+    <ProjectReference Include="..\SceneSplit.SceneAnalysisLambda\SceneSplit.SceneAnalysisLambda.csproj" />
+  </ItemGroup>
+
+</Project>
