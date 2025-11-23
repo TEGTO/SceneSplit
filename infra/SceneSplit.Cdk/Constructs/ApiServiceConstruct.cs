@@ -42,7 +42,7 @@ public class ApiServiceConstruct : Construct
             Retention = RetentionDays.ONE_DAY
         });
 
-        var props = new ApplicationLoadBalancedFargateServiceProps
+        FargateService = new ApplicationLoadBalancedFargateService(this, "ApiService", new ApplicationLoadBalancedFargateServiceProps
         {
             ServiceName = serviceName,
             Cluster = cluster,
@@ -78,10 +78,12 @@ public class ApiServiceConstruct : Construct
             HealthCheck = TaskHelpers.AddHealthCheckForTask("8080/health"),
             MinHealthyPercent = 100,
             MaxHealthyPercent = 200
-        };
+        });
 
-        FargateService = new ApplicationLoadBalancedFargateService(
-            this, "ApiService", TaskHelpers.AddOtelCollectorSidecar(props, serviceName, OtelCollectorHelper.GetConfiguration(serviceLogGroup.LogGroupName)));
+        TaskHelpers.AddOtelCollectorSidecar(FargateService.TaskDefinition,
+            serviceName,
+            CdkConfig.SERVICE_NAMESPACE,
+            OtelCollectorHelper.GetConfiguration(serviceLogGroup.LogGroupName));
 
         FargateService.TargetGroup.EnableCookieStickiness(Duration.Minutes(30));
         FargateService.TargetGroup.ConfigureHealthCheck(new HealthCheck

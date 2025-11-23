@@ -14,11 +14,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\SceneSplit.Backend.ServiceDefaults\SceneSplit.Backend.ServiceDefaults.csproj" />
         <ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
         <ProjectReference Include="..\SceneSplit.GrpcClientShared\SceneSplit.GrpcClientShared.csproj" />
         <ProjectReference Include="..\SceneSplit.ImageCompression.Sdk\SceneSplit.ImageCompression.Sdk.csproj" />
         <ProjectReference Include="..\SceneSplit.Observability\SceneSplit.Observability.csproj" />
+        <ProjectReference Include="..\SceneSplit.Backend.ServiceDefaults\SceneSplit.Backend.ServiceDefaults.csproj" />
     </ItemGroup>
   
     <ItemGroup>

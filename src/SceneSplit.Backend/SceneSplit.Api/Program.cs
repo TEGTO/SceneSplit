@@ -15,7 +15,7 @@ builder.AddServiceDefaults();
 
 if (!builder.Environment.IsDevelopment())
 {
-    builder.Services.AddAwsOpenTelemetryMetrics(ApiConfigurationKeys.TELEMETRY_SERVICE_NAME);
+    builder.Services.AddAwsOpenTelemetryMetrics();
 }
 
 builder.Services.AddControllers();

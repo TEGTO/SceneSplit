@@ -12,8 +12,6 @@ public static class ApiConfigurationKeys
     public static string IMAGE_QUALITY_COMPRESSION { get; } = nameof(IMAGE_QUALITY_COMPRESSION);
     public static string RESIZE_WIDTH { get; } = nameof(RESIZE_WIDTH);
     public static string RESIZE_HEIGHT { get; } = nameof(RESIZE_HEIGHT);
-
-    public static string TELEMETRY_SERVICE_NAME { get; } = "SceneSplit.Api";
 }
 
 public static class WorkflowTags
@@ -60,4 +58,6 @@ public static class ObjectImageCleanerLambdaConfigurationKeys
 public static class ObservabilityConfigurationKeys
 {
     public static string OPENTELEMETRY_SERVICE_NAMESPACE { get; } = nameof(OPENTELEMETRY_SERVICE_NAMESPACE);
+    public static string OPENTELEMETRY_SERVICE_NAME { get; } = nameof(OPENTELEMETRY_SERVICE_NAME);
+    public static string HEALTH_ENDPOINT { get; } = "/health";
 }

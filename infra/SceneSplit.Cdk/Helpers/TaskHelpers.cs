@@ -1,6 +1,5 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.ECS;
-using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Logs;
 using SceneSplit.Configuration;
@@ -21,23 +20,25 @@ public static class TaskHelpers
         };
     }
 
-    public static T AddOtelCollectorSidecar<T>(
-        T props,
+    public static void AddOtelCollectorSidecar(
+        TaskDefinition taskDefinition,
+        string serviceName,
         string serviceNamespace,
         string collectorConfig,
-        string containerName = "otel-collector") where T : IFargateServiceBaseProps
+        string containerName = "otel-collector")
     {
-        var defaultContainer = props.TaskDefinition?.DefaultContainer;
+        var defaultContainer = taskDefinition.DefaultContainer;
 
         if (defaultContainer == null)
         {
-            return props;
+            return;
         }
 
+        defaultContainer.AddEnvironment(ObservabilityConfigurationKeys.OPENTELEMETRY_SERVICE_NAME, serviceName);
         defaultContainer.AddEnvironment(ObservabilityConfigurationKeys.OPENTELEMETRY_SERVICE_NAMESPACE, serviceNamespace);
         defaultContainer.AddEnvironment("AWS_EMF_ENVIRONMENT", "Local");
 
-        props.TaskDefinition!.AddToTaskRolePolicy(new PolicyStatement(new PolicyStatementProps
+        taskDefinition.AddToTaskRolePolicy(new PolicyStatement(new PolicyStatementProps
         {
             Resources = ["*"],
             Actions =
@@ -58,7 +59,7 @@ public static class TaskHelpers
         var serviceLogGroupName = defaultContainer.LogDriverConfig?.Options?["awslogs-group"];
 
         var serviceLogGroup = !string.IsNullOrEmpty(serviceLogGroupName)
-            ? LogGroup.FromLogGroupName(props.TaskDefinition, "OtelCollectorLogGroup", serviceLogGroupName)
+            ? LogGroup.FromLogGroupName(taskDefinition, "OtelCollectorLogGroup", serviceLogGroupName)
             : null;
 
         var streamPrefix = defaultContainer.LogDriverConfig?.Options?["awslogs-stream-prefix"] ?? string.Empty;
@@ -69,7 +70,7 @@ public static class TaskHelpers
             StreamPrefix = streamPrefix
         });
 
-        var container = props.TaskDefinition.AddContainer(containerName, new ContainerDefinitionOptions
+        var container = taskDefinition.AddContainer(containerName, new ContainerDefinitionOptions
         {
             ContainerName = containerName,
             Command = ["--config=/etc/ecs/ecs-default-config.yaml"],
@@ -98,12 +99,10 @@ public static class TaskHelpers
         });
 
         defaultContainer.AddContainerDependencies(
-           new ContainerDependency
-           {
-               Container = container,
-               Condition = ContainerDependencyCondition.START
-           });
-
-        return props;
+            new ContainerDependency
+            {
+                Container = container,
+                Condition = ContainerDependencyCondition.START
+            });
     }
 }

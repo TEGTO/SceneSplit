@@ -2,16 +2,19 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using SceneSplit.Configuration;
+using static SceneSplit.Configuration.ObservabilityConfigurationKeys;
 
 namespace SceneSplit.Observability;
 
 public static class OpenTelemetryExtensions
 {
-    public static IServiceCollection AddAwsOpenTelemetryMetrics(this IServiceCollection services, string serviceName)
+    public static IServiceCollection AddAwsOpenTelemetryMetrics(this IServiceCollection services)
     {
-        var serviceNamespace = Environment.GetEnvironmentVariable(ObservabilityConfigurationKeys.OPENTELEMETRY_SERVICE_NAMESPACE)
+        var serviceName = Environment.GetEnvironmentVariable(OPENTELEMETRY_SERVICE_NAME)
             ?? "<empty>";
+        var serviceNamespace = Environment.GetEnvironmentVariable(OPENTELEMETRY_SERVICE_NAMESPACE)
+            ?? "<empty>";
+
         services.AddOpenTelemetry()
             .ConfigureResource(r =>
             {
@@ -20,13 +23,19 @@ public static class OpenTelemetryExtensions
             })
             .WithTracing(t =>
             {
-                t.AddAspNetCoreInstrumentation();
+                t.AddAspNetCoreInstrumentation(options =>
+                {
+                    options.Filter = httpContext =>
+                        !httpContext.Request.Path.StartsWithSegments(HEALTH_ENDPOINT);
+                });
+                t.AddHttpClientInstrumentation();
                 t.AddAWSInstrumentation();
                 t.AddXRayTraceId();
                 t.AddOtlpExporter();
             })
             .WithMetrics(m =>
             {
+                m.AddHttpClientInstrumentation();
                 m.AddAspNetCoreInstrumentation();
                 m.AddOtlpExporter((exporterOptions, readerOptions) =>
                 {
