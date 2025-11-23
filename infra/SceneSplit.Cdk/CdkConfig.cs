@@ -2,5 +2,5 @@
 
 public static class CdkConfig
 {
-    public static string SERVICE_NAMESPACE = "scene-split";
+    public readonly static string SERVICE_NAMESPACE = "scene-split";
 }
