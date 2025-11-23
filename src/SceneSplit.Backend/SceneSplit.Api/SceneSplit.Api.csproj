@@ -18,6 +18,7 @@
         <ProjectReference Include="..\SceneSplit.Configuration\SceneSplit.Configuration.csproj" />
         <ProjectReference Include="..\SceneSplit.GrpcClientShared\SceneSplit.GrpcClientShared.csproj" />
         <ProjectReference Include="..\SceneSplit.ImageCompression.Sdk\SceneSplit.ImageCompression.Sdk.csproj" />
+        <ProjectReference Include="..\SceneSplit.Observability\SceneSplit.Observability.csproj" />
     </ItemGroup>
   
     <ItemGroup>

@@ -7,10 +7,16 @@ using SceneSplit.Api.Services.StorageService;
 using SceneSplit.Configuration;
 using SceneSplit.GrpcClientShared.Extenstions;
 using SceneSplit.ImageCompression.Sdk;
+using SceneSplit.Observability;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddAwsOpenTelemetryMetrics(ApiConfigurationKeys.TELEMETRY_SERVICE_NAME);
+}
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
