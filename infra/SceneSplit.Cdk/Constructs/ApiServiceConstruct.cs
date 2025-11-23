@@ -2,6 +2,7 @@
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
+using Amazon.CDK.AWS.Logs;
 using Amazon.CDK.AWS.S3;
 using Constructs;
 using SceneSplit.Cdk.Helpers;
@@ -32,9 +33,18 @@ public class ApiServiceConstruct : Construct
 
         secGroup.AddIngressRule(Peer.Ipv4(vpc.VpcCidrBlock), Port.Tcp(8080), "Allow all traffic within VPC");
 
+        var serviceName = "scene-split-api";
+
+        var serviceLogGroup = new LogGroup(scope, $"ApiServiceLogGroup", new LogGroupProps()
+        {
+            LogGroupName = $"/ecs/{serviceName}",
+            RemovalPolicy = RemovalPolicy.DESTROY,
+            Retention = RetentionDays.ONE_DAY
+        });
+
         FargateService = new ApplicationLoadBalancedFargateService(this, "ApiService", new ApplicationLoadBalancedFargateServiceProps
         {
-            ServiceName = "scene-split-api",
+            ServiceName = serviceName,
             Cluster = cluster,
             DesiredCount = 1,
             TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
@@ -57,7 +67,8 @@ public class ApiServiceConstruct : Construct
                 },
                 LogDriver = LogDriver.AwsLogs(new AwsLogDriverProps
                 {
-                    StreamPrefix = "apiServiceLogs"
+                    LogGroup = serviceLogGroup,
+                    StreamPrefix = $"{serviceName}"
                 }),
             },
             SecurityGroups = [secGroup],
@@ -68,6 +79,11 @@ public class ApiServiceConstruct : Construct
             MinHealthyPercent = 100,
             MaxHealthyPercent = 200
         });
+
+        TaskHelpers.AddOtelCollectorSidecar(FargateService.TaskDefinition,
+            serviceName,
+            CdkConfig.SERVICE_NAMESPACE,
+            OtelCollectorHelper.GetConfiguration(serviceLogGroup.LogGroupName));
 
         FargateService.TargetGroup.EnableCookieStickiness(Duration.Minutes(30));
         FargateService.TargetGroup.ConfigureHealthCheck(new HealthCheck

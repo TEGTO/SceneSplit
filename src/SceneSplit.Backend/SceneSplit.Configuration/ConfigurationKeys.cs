@@ -54,3 +54,10 @@ public static class ObjectImageCleanerLambdaConfigurationKeys
     public static string MAX_KEYS_SEARCH_CONCURENCY { get; } = nameof(MAX_KEYS_SEARCH_CONCURENCY);
     public static string MAX_DELETE_BRANCH { get; } = nameof(MAX_DELETE_BRANCH);
 }
+
+public static class ObservabilityConfigurationKeys
+{
+    public static string OPENTELEMETRY_SERVICE_NAMESPACE { get; } = nameof(OPENTELEMETRY_SERVICE_NAMESPACE);
+    public static string OPENTELEMETRY_SERVICE_NAME { get; } = nameof(OPENTELEMETRY_SERVICE_NAME);
+    public static string HEALTH_ENDPOINT { get; } = "/health";
+}

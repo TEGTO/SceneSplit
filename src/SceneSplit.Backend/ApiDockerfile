@@ -16,6 +16,8 @@ COPY src/SceneSplit.Backend/SceneSplit.Api ./SceneSplit.Api
 COPY src/SceneSplit.Backend/SceneSplit.Configuration ./SceneSplit.Configuration
 COPY src/SceneSplit.Backend/SceneSplit.ImageCompression.Sdk ./SceneSplit.ImageCompression.Sdk
 COPY src/SceneSplit.Backend/SceneSplit.GrpcClientShared ./SceneSplit.GrpcClientShared
+COPY src/SceneSplit.Backend/SceneSplit.Backend.ServiceDefaults ./SceneSplit.Backend.ServiceDefaults
+COPY src/SceneSplit.Backend/SceneSplit.Observability ./SceneSplit.Observability
 
 WORKDIR /src/SceneSplit.Api
 RUN dotnet restore "SceneSplit.Api.csproj"
